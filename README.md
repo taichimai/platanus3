@@ -1,2 +1,2 @@
 # platanus3
-genome assembler for HiFi reads
+Genome assembler for HiFi reads.
