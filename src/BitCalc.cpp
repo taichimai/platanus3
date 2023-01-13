@@ -1,15 +1,6 @@
 #ifndef BITCALC_CPP
 #define BITCALC_CPP
-
-#include<iostream>
-#include<fstream>
-#include<sstream>
-#include<unordered_map>
-#include<vector>
-#include<set>
-#include<string>
-#include<array>
-#include<bitset>
+#include"common.h"
 
 char bit_to_base[4]={'A','C','G','T'};
 
@@ -17,7 +8,7 @@ template<typename BITLENGTH>
 BITLENGTH GetFirstKmerForward(std::string kmer){
     BITLENGTH A(0),C(1),G(2),T(3);
     BITLENGTH left_kmer(0);
-    for (int i=0;i<(kmer.size()*2);i++){
+    for (int i=0;i<kmer.size();i++){
         left_kmer<<=2;
         if (kmer[i]=='A') left_kmer=(left_kmer | A);
         else if (kmer[i]=='C') left_kmer=(left_kmer | C);
@@ -31,7 +22,7 @@ template<typename BITLENGTH>
 BITLENGTH GetFirstKmerBackward(std::string kmer){
     BITLENGTH A(0),C(1),G(2),T(3);
     BITLENGTH left_kmer(0);
-    for (int i=(kmer.size()*2)-1;i>=0;i--){
+    for (int i=kmer.size()-1;i>=0;i--){
         left_kmer<<=2;
         if (kmer[i]=='A') left_kmer=(left_kmer | T);
         else if (kmer[i]=='C') left_kmer=(left_kmer | G);
@@ -57,11 +48,10 @@ template<typename BITLENGTH>
 BITLENGTH CompareBit(BITLENGTH Bit_Fw,BITLENGTH Bit_Bw,int bitset_length){
     for (int i=0;i<bitset_length;i++){
         if (Bit_Fw[bitset_length-1-i]<Bit_Bw[bitset_length-1-i]) return Bit_Fw;
-        else return Bit_Bw;
+        else if (Bit_Fw[bitset_length-1-i]>Bit_Bw[bitset_length-1-i]) return Bit_Bw;
     }
     return Bit_Fw;
 }
-
 
 template<typename BITLENGTH>
 std::string GetStringKmer(BITLENGTH &BitKmer){

@@ -1,4 +1,13 @@
-#include"Load.h"
+#ifndef LOAD_CPP
+#define LOAD_CPP
+#include"common.h"
+
+class FastaFile{
+    public:
+        ReadSet Reads;
+        FastaFile(std::string FileName);
+        KmerSet GetSeedKmer(int kmer_length);
+};
 
 FastaFile::FastaFile(std::string FileName){
     ReadSet  Input_Reads;
@@ -19,10 +28,7 @@ FastaFile::FastaFile(std::string FileName){
         }
     }
     Input_Reads[readname]=seq;
-
-
     this->Reads=Input_Reads;
-
 }
 
 KmerSet FastaFile::GetSeedKmer(int kmer_length){
@@ -32,3 +38,4 @@ KmerSet FastaFile::GetSeedKmer(int kmer_length){
     }
     return EdgeKmers;
 }
+#endif 

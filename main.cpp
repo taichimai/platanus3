@@ -1,13 +1,4 @@
-#include<iostream>
-#include<fstream>
-#include<sstream>
-#include<unordered_map>
-#include<vector>
-#include<set>
-#include<string>
-#include<bitset>
-#include<tuple>
-#include<queue>
+#include"common.h"
 #include"Load.cpp"
 #include"bloomfilter.cpp"
 #include"MakeBloomFilter.cpp"
@@ -21,18 +12,18 @@ int main(int argc,char **argv){
     std::cerr<<"fasta file loaded"<<std::endl;
 
     //parameter
-    uint64_t FilterSize=1000000000;
-    uint8_t NumHashes=5;
-    uint32_t  kmer_length=501;
-    const uint32_t bitset_length=1002; // kmer_length*2
+    uint64_t FilterSize=10000000;
+    uint8_t NumHashes=4;
+    const uint32_t bitset_length=42; // kmer_length*2
+    uint32_t  kmer_length=bitset_length/2;
     //seed k-mer
     KmerSet seed_kmer=inputreads.GetSeedKmer(kmer_length);
-    
     //make bloomfilter
     BF<std::bitset<bitset_length> > first_bloom_filter=MakeBF<std::bitset<bitset_length> >(&inputreads.Reads,FilterSize,NumHashes,kmer_length);
     //make debruijngraph
     DeBruijnGraph<std::bitset<bitset_length> > first_dbg(kmer_length);
     first_dbg.MakeDBG(seed_kmer,first_bloom_filter,FilterSize,NumHashes);
+    first_dbg.PrintGraph();
 
     return 0;
 }
