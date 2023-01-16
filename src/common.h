@@ -16,5 +16,6 @@
 
 typedef std::unordered_map<std::string,std::string> ReadSet;
 typedef std::set<std::string>  KmerSet;
+typedef int id_counter;
 
 #endif

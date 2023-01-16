@@ -7,6 +7,8 @@ template<typename Key>
 class BF {
     public:
       BF(uint64_t size, uint8_t numHashes);
+      BF();
+      void Set_BF(uint64_t size, uint8_t numHashes);
 
       void add(const Key *data, std::size_t len);
 
@@ -19,15 +21,32 @@ class BF {
                         uint64_t hashB,
                         uint64_t filterSize);
 
+      void Delete_Filter();
+
     private:
       uint8_t m_numHashes;
       std::vector<bool> m_bits; 
+
+      
+      
 };
 
 template<typename Key>
 BF<Key>::BF(uint64_t size, uint8_t numHashes)
       : m_bits(size),
         m_numHashes(numHashes) {}
+
+template<typename Key>
+BF<Key>::BF()
+      : m_bits(0),
+        m_numHashes(0) {}
+
+
+template<typename Key>
+void BF<Key>::Set_BF(uint64_t size, uint8_t numHashes){
+  std::vector<bool>(size).swap(m_bits);
+  m_numHashes=numHashes;
+}
 
 template<typename Key>
 std::array<uint64_t, 2> BF<Key>::hash(const Key *data,std::size_t len){
@@ -65,4 +84,10 @@ bool  BF<Key>::possiblyContains(const Key *data, std::size_t len) {
 
   return true;
 }
+
+template<typename Key>
+void BF<Key>::Delete_Filter() {
+  std::vector<bool>().swap(m_bits);
+}
+
 #endif 

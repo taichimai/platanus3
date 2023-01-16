@@ -13,8 +13,8 @@ int main(int argc,char **argv){
 
     //parameter
     uint64_t FilterSize=10000000;
-    uint8_t NumHashes=4;
-    const uint32_t bitset_length=42; // kmer_length*2
+    uint8_t NumHashes=5;
+    const uint32_t bitset_length=10; // kmer_length*2
     uint32_t  kmer_length=bitset_length/2;
     //seed k-mer
     KmerSet seed_kmer=inputreads.GetSeedKmer(kmer_length);
