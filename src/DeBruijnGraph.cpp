@@ -191,7 +191,9 @@ BITLENGTH DeBruijnGraph<BITLENGTH>::ExtendLeft(BITLENGTH &target_kmer,BITLENGTH 
     }
 
     if (stock_left.size()==1 and stock_right.size()==0){
-        if (visited_kmers.possiblyContains(&target_kmer,bitset_length)){
+        BITLENGTH target_kmer_bw=GetComplementKmer(target_kmer);
+        BITLENGTH query_kmer=CompareBit(target_kmer,target_kmer_bw,bitset_length);
+        if (visited_kmers.possiblyContains(&query_kmer,bitset_length)){
             (*extend_bases).clear();
             return target_kmer;
         }
@@ -202,7 +204,9 @@ BITLENGTH DeBruijnGraph<BITLENGTH>::ExtendLeft(BITLENGTH &target_kmer,BITLENGTH 
     }
     //junction
     else{
-        if (!visited_kmers.possiblyContains(&target_kmer,bitset_length)){
+        BITLENGTH target_kmer_bw=GetComplementKmer(target_kmer);
+        BITLENGTH query_kmer=CompareBit(target_kmer,target_kmer_bw,bitset_length);
+        if (!visited_kmers.possiblyContains(&query_kmer,bitset_length)){
             for (auto itr=stock_left.begin();itr!=stock_left.end();++itr){
                 visiting.push(*itr);
                 junction_edges.push_back({*itr,target_kmer}); 
@@ -253,7 +257,9 @@ BITLENGTH DeBruijnGraph<BITLENGTH>::ExtendRight(BITLENGTH target_kmer,BITLENGTH 
     }
 
     if (stock_left.size()==0 and stock_right.size()==1){
-        if (visited_kmers.possiblyContains(&target_kmer,bitset_length)){
+        BITLENGTH target_kmer_bw=GetComplementKmer(target_kmer);
+        BITLENGTH query_kmer=CompareBit(target_kmer,target_kmer_bw,bitset_length);
+        if (visited_kmers.possiblyContains(&query_kmer,bitset_length)){
             (*extend_bases).clear();
             return target_kmer;
         }
@@ -264,7 +270,9 @@ BITLENGTH DeBruijnGraph<BITLENGTH>::ExtendRight(BITLENGTH target_kmer,BITLENGTH 
 
     //junction
     else{
-        if (!visited_kmers.possiblyContains(&target_kmer,bitset_length)){
+        BITLENGTH target_kmer_bw=GetComplementKmer(target_kmer);
+        BITLENGTH query_kmer=CompareBit(target_kmer,target_kmer_bw,bitset_length);
+        if (!visited_kmers.possiblyContains(&query_kmer,bitset_length)){
             for (auto itr=stock_left.begin();itr!=stock_left.end();++itr){
                 visiting.push(*itr);
                 junction_edges.push_back({*itr,target_kmer});
@@ -286,6 +294,9 @@ template<typename BITLENGTH>
 void DeBruijnGraph<BITLENGTH>::AddJunctionNode(BITLENGTH &added_junction_node){
     junction_nodes_id++;
     junction_nodes[added_junction_node]="Junction_"+std::to_string(junction_nodes_id);
+
+    //junction_nodes[added_junction_node]=GetStringKmer(added_junction_node); //debug用
+
 }
 
 template<typename BITLENGTH>
@@ -293,12 +304,17 @@ void DeBruijnGraph<BITLENGTH>::AddJointNode(BITLENGTH &added_joint_node){
     if ( joint_nodes.find(added_joint_node)!=joint_nodes.end() ) return;
     joint_nodes_id++;
     joint_nodes[added_joint_node]="Joint_"+std::to_string(joint_nodes_id);
+
+    //joint_nodes[added_joint_node]=GetStringKmer(added_joint_node); //debug用
+
 }
 
 template<typename BITLENGTH>
 void DeBruijnGraph<BITLENGTH>::AddStraightNode(std::string &added_straight_node){
     straight_nodes_id++;
     straight_nodes[added_straight_node]="Straight_"+std::to_string(straight_nodes_id);
+
+    //straight_nodes[added_straight_node]=added_straight_node; //debug用
 }
 
 template<typename BITLENGTH>
