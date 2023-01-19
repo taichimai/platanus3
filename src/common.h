@@ -2,6 +2,7 @@
 #define COMMON_H
 
 #include<iostream>
+#include <unistd.h>
 #include<fstream>
 #include<sstream>
 #include<unordered_map>
@@ -14,6 +15,7 @@
 #include<queue>
 #include<omp.h>
 
+typedef int Error;
 typedef std::unordered_map<std::string,std::string> ReadSet;
 typedef std::set<std::string>  KmerSet;
 typedef int id_counter;
