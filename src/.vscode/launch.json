@@ -1,0 +1,13 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "C/C++ Runner: Debug Session",
+      "type": "lldb",
+      "request": "launch",
+      "args": [],
+      "cwd": "/Users/imaitaichi/works/git/platanus3/src",
+      "program": "/Users/imaitaichi/works/git/platanus3/src/build/Debug/outDebug"
+    }
+  ]
+}
