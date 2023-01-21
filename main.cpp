@@ -24,10 +24,9 @@ int main(int argc,char **argv){
     //make bloomfilter
     BF<std::bitset<bitset_length> > first_bloom_filter=MakeBF<std::bitset<bitset_length> >(&inputreads.reads,FilterSize,NumHashes,kmer_length);
     //make debruijngraph
-    DeBruijnGraph<std::bitset<bitset_length> > first_dbg(kmer_length);
-    first_dbg.MakeDBG(seed_kmer,first_bloom_filter,FilterSize,NumHashes);
+    DeBruijnGraph<std::bitset<bitset_length> > first_dbg(kmer_length,first_bloom_filter);
+    first_dbg.MakeDBG(seed_kmer,FilterSize,NumHashes);
     first_dbg.PrintGraph();
-
     return 0;
 }
 
