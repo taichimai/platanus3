@@ -10,16 +10,16 @@ class DeBruijnGraph{
       int bitset_length;
       std::vector<BITLENGTH> end_bases;
       
-      std::vector< std::tuple<BITLENGTH,BITLENGTH> > junction_edges;  
+      std::vector< std::tuple<BITLENGTH,char,BITLENGTH,char> > junction_edges;  
       std::vector< std::tuple<BITLENGTH,std::string,std::string> > straight_edges;  
 
       std::unordered_map<std::string,std::string> straight_nodes;  
       std::unordered_map<BITLENGTH,std::tuple<std::string,int> > junction_nodes;
       std::unordered_map<BITLENGTH,std::tuple<std::string,int> > joint_nodes;  
 
-      id_counter straight_nodes_id;
-      id_counter junction_nodes_id;
-      id_counter joint_nodes_id;
+      id_counter straight_nodes_id=0;
+      id_counter junction_nodes_id=0;
+      id_counter joint_nodes_id=0;
 
       BF<BITLENGTH> *all_kmers;
       BF<BITLENGTH> visited_kmers;     //for making dbg
@@ -31,14 +31,23 @@ class DeBruijnGraph{
       //methods
       void MakeDBG(KmerSet &seedkmer,uint64_t filtersize ,uint8_t numhashes);
       void SearchNode(BITLENGTH target_kmer);
+
       BITLENGTH ExtendLeft(BITLENGTH &target_kmer,BITLENGTH &previous_kmer ,std::vector<char> *extend_bases,int previous_base);
       BITLENGTH ExtendRight(BITLENGTH target_kmer,BITLENGTH &previous_kmer,std::vector<char> *extend_bases,int previous_base);
+
       bool IsRecorded(BF<BITLENGTH> &bloomfilter,BITLENGTH &seqrching_kmer);
       void RecordKmer(BF<BITLENGTH> &bloomfilter,BITLENGTH &seqrching_kmer);
       void CheckDirections(std::vector<BITLENGTH> *stock_left,std::vector<BITLENGTH> *stock_right,BITLENGTH &target_kmer,int ignored_direction);
+
+      void AddJunctionEdge(BITLENGTH &junction_node,BITLENGTH &nearby_node,std::string direction);
+      void AddStraightEdge(BITLENGTH &joint_node,std::string &straight_node,std::string direction);
+
       void AddJunctionNode(BITLENGTH &added_junction_node);
       void AddJointNode(BITLENGTH &added_joint_node);
       void AddStraightNode(std::string &added_straight_node);
+
+      void CountNodeCoverage(ReadSet &RS);
+      void AddNodeCoverage(BITLENGTH &target_kmer);
       void PrintGraph();
       
 };
@@ -67,7 +76,6 @@ void DeBruijnGraph<BITLENGTH>::MakeDBG(KmerSet &seedkmer,uint64_t filtersize ,ui
 
         while(!visiting.empty()){
             BITLENGTH visiting_kmer=visiting.front();
-            std::cout<<GetStringKmer(visiting_kmer)<<std::endl;
             visiting.pop();
             SearchNode(visiting_kmer);
         } 
@@ -89,11 +97,11 @@ void DeBruijnGraph<BITLENGTH>::SearchNode(BITLENGTH target_kmer){
     if (stock_left.size()!=1 or stock_right.size()!=1) {
         for (auto itr=stock_left.begin();itr!=stock_left.end();++itr){
             visiting.push(*itr);
-            junction_edges.push_back({*itr,target_kmer}); 
+            AddJunctionEdge(target_kmer,*itr,"left");
         }
         for (auto itr=stock_right.begin();itr!=stock_right.end();++itr){
             visiting.push(*itr);
-            junction_edges.push_back({target_kmer,*itr}); 
+            AddJunctionEdge(target_kmer,*itr,"right");
         }
         AddJunctionNode(target_kmer);
         RecordKmer(visited_kmers,target_kmer);
@@ -117,8 +125,6 @@ void DeBruijnGraph<BITLENGTH>::SearchNode(BITLENGTH target_kmer){
     for (int i=0;i<extend_bases_right.size();i++){
         right_part+=extend_bases_right[i]; 
     }
-    //std::cout<<"left "<<"end "<<GetStringKmer(left_end_kmer)<<std::endl;
-    //std::cout<<"right "<<"end "<<GetStringKmer(right_end_kmer)<<std::endl;
     AddJointNode(left_end_kmer);
     AddJointNode(right_end_kmer);
     RecordKmer(visited_kmers,left_end_kmer);
@@ -127,8 +133,11 @@ void DeBruijnGraph<BITLENGTH>::SearchNode(BITLENGTH target_kmer){
     if ((left_part.size()+right_part.size())>=1){
         std::string straightnode=left_part+GetStringKmer(target_kmer)+right_part;
         AddStraightNode(straightnode);
-        straight_edges.push_back({left_end_kmer,straightnode,"right"}); 
-        straight_edges.push_back({right_end_kmer,straightnode,"left"}); 
+        AddStraightEdge(left_end_kmer,straightnode,"right");
+        AddStraightEdge(right_end_kmer,straightnode,"left");
+
+
+        
     }
 
 
@@ -159,14 +168,14 @@ BITLENGTH DeBruijnGraph<BITLENGTH>::ExtendLeft(BITLENGTH &target_kmer,BITLENGTH 
         if (!IsRecorded(visited_kmers,target_kmer)){
             for (auto itr=stock_left.begin();itr!=stock_left.end();++itr){
                 visiting.push(*itr);
-                junction_edges.push_back({*itr,target_kmer}); 
+                AddJunctionEdge(target_kmer,*itr,"left");
             }
             for (auto itr=stock_right.begin();itr!=stock_right.end();++itr){
                 visiting.push(*itr);
-                junction_edges.push_back({target_kmer,*itr});
+                AddJunctionEdge(target_kmer,*itr,"right");
             }
             AddJunctionNode(target_kmer);
-            junction_edges.push_back({target_kmer,previous_kmer});
+            AddJunctionEdge(target_kmer,previous_kmer,"right");
             RecordKmer(visited_kmers,target_kmer);
         }
         return previous_kmer;
@@ -196,14 +205,15 @@ BITLENGTH DeBruijnGraph<BITLENGTH>::ExtendRight(BITLENGTH target_kmer,BITLENGTH 
         if (!IsRecorded(visited_kmers,target_kmer)){
             for (auto itr=stock_left.begin();itr!=stock_left.end();++itr){
                 visiting.push(*itr);
-                junction_edges.push_back({*itr,target_kmer});
+                AddJunctionEdge(target_kmer,*itr,"left");
             }
             for (auto itr=stock_right.begin();itr!=stock_right.end();++itr){
                 visiting.push(*itr);
-                junction_edges.push_back({target_kmer,*itr}); 
+                AddJunctionEdge(target_kmer,*itr,"right");
             }
             AddJunctionNode(target_kmer);
-            junction_edges.push_back({previous_kmer,target_kmer});
+            AddJunctionEdge(target_kmer,previous_kmer,"left");
+
             RecordKmer(visited_kmers,target_kmer);
         }
         
@@ -245,6 +255,32 @@ void DeBruijnGraph<BITLENGTH>::CheckDirections(std::vector<BITLENGTH> *stock_lef
     }
 }
 
+template<typename BITLENGTH>
+void DeBruijnGraph<BITLENGTH>::AddJunctionEdge(BITLENGTH &junction_node,BITLENGTH &nearby_node,std::string direction){
+    BITLENGTH nearby_node_bw=GetComplementKmer(nearby_node);
+    if (junction_node==nearby_node_bw){
+        if (direction=="right"){
+            junction_edges.push_back({junction_node,'+',junction_node,'-'}); 
+        }
+        else{
+            junction_edges.push_back({junction_node,'-',junction_node,'+'}); 
+        }
+    }
+    else{
+        if (direction=="right"){
+            junction_edges.push_back({junction_node,'+',nearby_node,'+'}); 
+        }
+        else{
+            junction_edges.push_back({nearby_node,'+',junction_node,'+'}); 
+        }
+    }
+}
+
+template<typename BITLENGTH>
+void DeBruijnGraph<BITLENGTH>::AddStraightEdge(BITLENGTH &joint_node,std::string &straight_node,std::string direction){
+    straight_edges.push_back({joint_node,straight_node,direction});
+}
+
 
 
 template<typename BITLENGTH>
@@ -274,6 +310,35 @@ void DeBruijnGraph<BITLENGTH>::AddStraightNode(std::string &added_straight_node)
     //straight_nodes[added_straight_node]=added_straight_node; //debug用
 }
 
+template<typename BITLENGTH>
+void DeBruijnGraph<BITLENGTH>::CountNodeCoverage(ReadSet &RS){
+    #pragma omp parallel for  num_threads(4) 
+    for(size_t b=0;b<RS.bucket_count();b++)
+    for(auto bi=RS.begin(b);bi!=RS.end(b);bi++){
+        std::string target_read = (bi->second);
+        BITLENGTH kmer_Fw=GetFirstKmerForward<BITLENGTH>(target_read.substr(0,kmer_length));
+        BITLENGTH kmer_Bw=GetFirstKmerBackward<BITLENGTH>(target_read.substr(0,kmer_length));
+        AddNodeCoverage(kmer_Fw);
+        AddNodeCoverage(kmer_Bw);
+        
+        for (int i=kmer_length;i<target_read.size();i++){
+            kmer_Fw=((kmer_Fw<<2)| end_bases[ base_to_bit[ target_read[i] ] + 4 ] );
+            kmer_Bw=((kmer_Bw>>2)| end_bases[ base_to_bit[ trans_base[target_read[i]] ] ] );
+            AddNodeCoverage(kmer_Fw);
+            AddNodeCoverage(kmer_Bw);
+        }
+    }
+}
+
+template<typename BITLENGTH>
+void DeBruijnGraph<BITLENGTH>::AddNodeCoverage(BITLENGTH &target_kmer){
+    if (junction_nodes.find(target_kmer)!=junction_nodes.end() ){
+        std::get<1>(junction_nodes[target_kmer])++;
+    }
+    else if (joint_nodes.find(target_kmer)!=joint_nodes.end()){
+        std::get<1>(joint_nodes[target_kmer])++;
+    }
+}
 
 
 template<typename BITLENGTH>
@@ -291,15 +356,15 @@ void DeBruijnGraph<BITLENGTH>::PrintGraph(){
     writing_gfa<<"H\tVN:Z:1.0"<<std::endl;
     //nodes(straight)
     for (auto itr=straight_nodes.begin();itr!=straight_nodes.end();++itr){
-        writing_gfa<<"S"<<"\t"<<(itr->second)<<"\t"<<(itr->first)<<std::endl;
+        writing_gfa<<"S"<<"\t"<<(itr->second)<<"\t"<<(itr->first)<<"\t"<<"KC:i:"<<1<<std::endl;
     }
     //nodes(junction)
     for (auto itr=junction_nodes.begin();itr!=junction_nodes.end();++itr){
-        writing_gfa<<"S"<<"\t"<<std::get<0>(itr->second)<<"\t"<<GetStringKmer((itr->first))<<std::endl;
+        writing_gfa<<"S"<<"\t"<<std::get<0>(itr->second)<<"\t"<<GetStringKmer((itr->first))<<"\t"<<"KC:i:"<<std::get<1>(itr->second)*kmer_length<<std::endl;
     }
     //nodes(joint)
     for (auto itr=joint_nodes.begin();itr!=joint_nodes.end();++itr){
-        writing_gfa<<"S"<<"\t"<<std::get<0>(itr->second)<<"\t"<<GetStringKmer((itr->first))<<std::endl;
+        writing_gfa<<"S"<<"\t"<<std::get<0>(itr->second)<<"\t"<<GetStringKmer((itr->first))<<"\t"<<"KC:i:"<<std::get<1>(itr->second)*kmer_length<<std::endl;
     }
 
     
@@ -307,15 +372,11 @@ void DeBruijnGraph<BITLENGTH>::PrintGraph(){
     for (auto itr=straight_edges.begin();itr!=straight_edges.end();++itr){
         writing_gfa<<"L"<<"\t";
         if (std::get<2>(*itr)=="right"){
-            //writing_gfa<<GetStringKmer(std::get<0>(*itr))<<"\t"<<"+"<<"\t";
-            //writing_gfa<<std::get<1>(*itr)<<"\t"<<"+"<<"\t";
             writing_gfa<<std::get<0>(joint_nodes[std::get<0>(*itr)])<<"\t"<<"+"<<"\t";
             writing_gfa<<straight_nodes[std::get<1>(*itr)]<<"\t"<<"+"<<"\t";
             
         }
         else {
-            //writing_gfa<<std::get<1>(*itr)<<"\t"<<"+"<<"\t";
-            //writing_gfa<<GetStringKmer(std::get<0>(*itr))<<"\t"<<"+"<<"\t";
             writing_gfa<<straight_nodes[std::get<1>(*itr)]<<"\t"<<"+"<<"\t";
             writing_gfa<<std::get<0>(joint_nodes[std::get<0>(*itr)])<<"\t"<<"+"<<"\t";
         }
@@ -325,20 +386,18 @@ void DeBruijnGraph<BITLENGTH>::PrintGraph(){
     //edges(junction)
     for (auto itr=junction_edges.begin();itr!=junction_edges.end();++itr){
         writing_gfa<<"L"<<"\t";
-        //writing_gfa<<GetStringKmer(std::get<0>(*itr))<<"\t"<<"+"<<"\t";
-        //writing_gfa<<GetStringKmer(std::get<1>(*itr))<<"\t"<<"+"<<"\t";
 
         if (junction_nodes.find(std::get<0>(*itr))!=junction_nodes.end()){
-            writing_gfa<<std::get<0>(junction_nodes[std::get<0>(*itr)])<<"\t"<<"+"<<"\t";
+            writing_gfa<<std::get<0>(junction_nodes[std::get<0>(*itr)])<<"\t"<<std::get<1>(*itr)<<"\t";
         }
         else {
-            writing_gfa<<std::get<0>(joint_nodes[std::get<0>(*itr)])<<"\t"<<"+"<<"\t";
+            writing_gfa<<std::get<0>(joint_nodes[std::get<0>(*itr)])<<"\t"<<std::get<1>(*itr)<<"\t";
         }
-        if (junction_nodes.find(std::get<1>(*itr))!=junction_nodes.end()){
-            writing_gfa<<std::get<0>(junction_nodes[std::get<1>(*itr)])<<"\t"<<"+"<<"\t";
+        if (junction_nodes.find(std::get<2>(*itr))!=junction_nodes.end()){
+            writing_gfa<<std::get<0>(junction_nodes[std::get<2>(*itr)])<<"\t"<<std::get<3>(*itr)<<"\t";
         }
         else {
-            writing_gfa<<std::get<0>(joint_nodes[std::get<1>(*itr)])<<"\t"<<"+"<<"\t";
+            writing_gfa<<std::get<0>(joint_nodes[std::get<2>(*itr)])<<"\t"<<std::get<3>(*itr)<<"\t";
         }
 
         writing_gfa<<kmer_length-1<<"M"<<std::endl;

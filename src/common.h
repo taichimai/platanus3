@@ -20,4 +20,8 @@ typedef std::unordered_map<std::string,std::string> ReadSet;
 typedef std::set<std::string>  KmerSet;
 typedef int id_counter;
 
+char bit_to_base[4]={'A','C','G','T'};
+std::unordered_map<char,int> base_to_bit={{'A',0},{'C',1},{'G',2},{'T',3}};
+std::unordered_map<char,char> trans_base={{'A','T'},{'C','G'},{'G','C'},{'T','A'}};
+
 #endif

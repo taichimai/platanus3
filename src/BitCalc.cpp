@@ -2,7 +2,6 @@
 #define BITCALC_CPP
 #include"common.h"
 
-char bit_to_base[4]={'A','C','G','T'};
 
 template<typename BITLENGTH>
 BITLENGTH GetFirstKmerForward(std::string kmer){
