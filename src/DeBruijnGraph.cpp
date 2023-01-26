@@ -287,9 +287,9 @@ template<typename BITLENGTH>
 void DeBruijnGraph<BITLENGTH>::AddJunctionNode(BITLENGTH &added_junction_node){
     junction_nodes_id++;
     std::get<0>(junction_nodes[added_junction_node])="Junction_"+std::to_string(junction_nodes_id);
+    std::cout<<"add junction node"<<junction_nodes_id<<std::endl;
 
     //junction_nodes[added_junction_node]=GetStringKmer(added_junction_node); //debug用
-
 }
 
 template<typename BITLENGTH>
@@ -297,15 +297,17 @@ void DeBruijnGraph<BITLENGTH>::AddJointNode(BITLENGTH &added_joint_node){
     if ( joint_nodes.find(added_joint_node)!=joint_nodes.end() ) return;
     joint_nodes_id++;
     std::get<0>(joint_nodes[added_joint_node])="Joint_"+std::to_string(joint_nodes_id);
+    std::cout<<"add joint node"<<joint_nodes_id<<std::endl;
+
 
     //joint_nodes[added_joint_node]=GetStringKmer(added_joint_node); //debug用
-
 }
 
 template<typename BITLENGTH>
 void DeBruijnGraph<BITLENGTH>::AddStraightNode(std::string &added_straight_node){
     straight_nodes_id++;
     straight_nodes[added_straight_node]="Straight_"+std::to_string(straight_nodes_id);
+    std::cout<<"add straight node"<<straight_nodes_id<<std::endl;
 
     //straight_nodes[added_straight_node]=added_straight_node; //debug用
 }
