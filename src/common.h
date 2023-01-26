@@ -2,7 +2,7 @@
 #define COMMON_H
 
 #include<iostream>
-#include <unistd.h>
+#include<unistd.h>
 #include<fstream>
 #include<sstream>
 #include<unordered_map>
@@ -13,6 +13,7 @@
 #include<bitset>
 #include<tuple>
 #include<queue>
+#include<cmath>
 #include<omp.h>
 
 typedef int Error;
