@@ -15,7 +15,7 @@ BF<BITLENGTH> MakeBF(ReadSet &RS,uint64_t filtersize ,uint8_t numhashes,int kmer
     BITLENGTH T_right(3); BITLENGTH T_left=(T_right<<(kmer_length*2-2));
     std::vector<BITLENGTH> end_bases={A_left,C_left,G_left,T_left,A_right,C_right,G_right,T_right};
     
-    #pragma omp parallel for  num_threads(4) 
+    #pragma omp parallel for  num_threads(20) 
     for(size_t b=0;b<RS.bucket_count();b++)
     for(auto bi=RS.begin(b);bi!=RS.end(b);bi++){
         std::string target_read = (bi->second);  

@@ -47,7 +47,7 @@ void Options::EstimateBloomfilter(uint64_t all_bases){
     if (filter_size!=0) return;
     double false_positive_rate=1.0e-6;
     uint64_t item_number=all_bases*error_rate*kmer_length;
-    filter_size=(-item_number*(std::log(false_positive_rate)))/std::pow(std::log(2),2);
+    filter_size=(item_number*(-(std::log(false_positive_rate))))/std::pow(std::log(2),2);
     num_hashes=(std::log(2) * filter_size)/item_number;
     std::cerr<<"all_bases"<<" : "<<all_bases<<std::endl;
     std::cerr<<"item_number"<<" : "<<item_number<<std::endl;
