@@ -1,35 +1,25 @@
 #include"common.h"
-#include"ArgParse.cpp"
+#include"Options.cpp"
 #include"Load.cpp"
 #include"bloomfilter.cpp"
 #include"MakeBloomFilter.cpp"
 #include"DeBruijnGraph.cpp"
+#include"Assemble.cpp"
 
 
 int main(int argc,char **argv){
-    //input
-    std::string input_readfile_name;
-    Parse(argc,argv,&input_readfile_name);
-    ReadFile inputreads(input_readfile_name);
-    inputreads.LoadFile();
-    
+    //get parameter and data
+    Options parameters;
+    parameters.Parse(argc,argv);
+    ReadFile input_reads(parameters.readfile_name);
+    input_reads.LoadFile();
+    parameters.EstimateBloomfilter(input_reads.all_bases);
     std::cerr<<"read file loaded"<<std::endl;
-    //parameter
-    uint64_t FilterSize=10000000;
-    uint8_t NumHashes=10;
-    const uint32_t bitset_length=10; // kmer_length*2
-    uint32_t  kmer_length=bitset_length/2;
-    //seed k-mer
-    KmerSet seed_kmer=inputreads.GetSeedKmer(kmer_length);
-    //make bloomfilter
-    BF<std::bitset<bitset_length> > first_bloom_filter=MakeBF<std::bitset<bitset_length> >(&inputreads.reads,FilterSize,NumHashes,kmer_length);
-    std::cerr<<"bloom filter generated"<<std::endl;
-    //make debruijngraph
-    DeBruijnGraph<std::bitset<bitset_length> > first_dbg(kmer_length,first_bloom_filter);
-    first_dbg.MakeDBG(seed_kmer,FilterSize,NumHashes);
-    first_dbg.CountNodeCoverage(inputreads.reads);
-    first_dbg.PrintGraph();
-    std::cerr<<"finish!"<<std::endl;
+    parameters.PrintParameters();
+
+    //assemble
+    Assemble_k(input_reads,parameters);
+    std::cerr<<"finish"<<std::endl;
     return 0;
 }
 

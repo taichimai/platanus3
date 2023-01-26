@@ -6,7 +6,7 @@
 #include"bloomfilter.cpp"
 
 template<typename BITLENGTH>
-BF<BITLENGTH> MakeBF(ReadSet *RS,uint64_t filtersize ,uint8_t numhashes,int kmer_length){
+BF<BITLENGTH> MakeBF(ReadSet &RS,uint64_t filtersize ,uint8_t numhashes,int kmer_length){
     BF<BITLENGTH> Kmer_BF(filtersize,numhashes);
 
     BITLENGTH A_right(0); BITLENGTH A_left=(A_right<<(kmer_length*2-2)); 
@@ -16,8 +16,8 @@ BF<BITLENGTH> MakeBF(ReadSet *RS,uint64_t filtersize ,uint8_t numhashes,int kmer
     std::vector<BITLENGTH> end_bases={A_left,C_left,G_left,T_left,A_right,C_right,G_right,T_right};
     
     #pragma omp parallel for  num_threads(4) 
-    for(size_t b=0;b<(*RS).bucket_count();b++)
-    for(auto bi=(*RS).begin(b);bi!=(*RS).end(b);bi++){
+    for(size_t b=0;b<RS.bucket_count();b++)
+    for(auto bi=RS.begin(b);bi!=RS.end(b);bi++){
         std::string target_read = (bi->second);  
         BITLENGTH kmer_Fw=GetFirstKmerForward<BITLENGTH>(target_read.substr(0,kmer_length));
         BITLENGTH kmer_Bw=GetFirstKmerBackward<BITLENGTH>(target_read.substr(0,kmer_length));
@@ -33,3 +33,4 @@ BF<BITLENGTH> MakeBF(ReadSet *RS,uint64_t filtersize ,uint8_t numhashes,int kmer
     return Kmer_BF;
 }
 #endif
+
