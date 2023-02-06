@@ -106,5 +106,6 @@
     "utility": "cpp",
     "variant": "cpp",
     "vector": "cpp"
-  }
+  },
+  "C_Cpp.errorSquiggles": "enabled"
 }
