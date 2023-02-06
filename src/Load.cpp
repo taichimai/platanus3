@@ -99,3 +99,4 @@ KmerSet ReadFile::GetSeedKmer(int kmer_length){
     return edge_kmers;
 }
 #endif 
+
