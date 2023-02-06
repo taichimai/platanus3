@@ -12,7 +12,7 @@ int Assemble (ReadFile &input_reads,Options &parameters){
     first_dbg.MakeDBG(seed_kmer,parameters.filter_size,parameters.num_hashes);
     std::cerr<<"de bruijn graph loaded"<<std::endl;
     first_dbg.CountNodeCoverage(input_reads.reads);
-    // first_dbg.PrintGraph();
+    first_dbg.PrintGraph();
 
     return 0;
 }
