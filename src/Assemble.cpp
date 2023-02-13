@@ -5,14 +5,18 @@
 template<typename LARGE_BITSET>
 int Assemble (ReadFile &input_reads,Options &parameters){
     input_reads.GetSeedKmer(parameters.kmer_length);
+    std::cerr<<"get seed kmer"<<"\n";
     input_reads.CountShortKmer(parameters.shortk_length);
+    std::cerr<<"count short kmer"<<"\n";
     BF<LARGE_BITSET> first_bloom_filter=MakeBF<LARGE_BITSET>(input_reads.reads,input_reads.shortk_database,parameters.filter_size,parameters.num_hashes,parameters.kmer_length); //make bloomfilter
     std::cerr<<"bloom filter loaded"<<"\n";
-    DeBruijnGraph<LARGE_BITSET > first_dbg(parameters.kmer_length,first_bloom_filter);   //make debruijngraph
+    //make debruijngraph
+    DeBruijnGraph<LARGE_BITSET> first_dbg(parameters.kmer_length,first_bloom_filter);
     std::cerr<<"make de bruijn graph"<<"\n";
     first_dbg.MakeDBG(input_reads.seed_kmer,parameters.filter_size,parameters.num_hashes);
     std::cerr<<"de bruijn graph loaded"<<"\n";
     first_dbg.CountNodeCoverage(input_reads.reads);
+    std::cerr<<"count node coverage"<<"\n";
     first_dbg.PrintGraph();
 
     return 0;
