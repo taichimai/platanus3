@@ -14,12 +14,12 @@ int main(int argc,char **argv){
     ReadFile input_reads(parameters.readfile_name);
     input_reads.LoadFile();
     parameters.EstimateBloomfilter(input_reads.all_bases);
-    std::cerr<<"read file loaded"<<std::endl;
+    std::cerr<<"read file loaded"<<"\n";
     parameters.PrintParameters();
 
     //assemble
     Assemble_k(input_reads,parameters);
-    std::cerr<<"finish"<<std::endl;
+    std::cerr<<"finish"<<"\n";
     return 0;
 }
 

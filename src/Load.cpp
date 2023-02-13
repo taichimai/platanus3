@@ -9,12 +9,15 @@ class ReadFile{
         std::string file_type;
         Error error_code;
         uint64_t all_bases=0;
+        KmerSet seed_kmer;
+        KmerCount shortk_database;
 
         ReadFile(std::string input_file_name);
         void LoadFile();
         void LoadFasta(ReadSet *loaded_reads,std::string file_name);
         void LoadFastq(ReadSet *loaded_reads,std::string file_name);
-        KmerSet GetSeedKmer(int kmer_length);
+        void GetSeedKmer(int kmer_length);
+        void CountShortKmer(int shortk_length);
 };
 
 ReadFile::ReadFile(std::string input_file_name){
@@ -91,12 +94,36 @@ void ReadFile::LoadFastq(ReadSet *loaded_reads,std::string file_name){
 }
 
 
-KmerSet ReadFile::GetSeedKmer(int kmer_length){
+void ReadFile::GetSeedKmer(int kmer_length){
     KmerSet edge_kmers;
     for (auto itr=reads.begin();itr!=reads.end();++itr){
         edge_kmers.insert((itr->second).substr(0,kmer_length));
     }
-    return edge_kmers;
+    this->seed_kmer=edge_kmers;
 }
-#endif 
 
+void ReadFile::CountShortKmer(int shortk_length){
+    KmerCount all_short_kmers;
+    for (auto itr = reads.begin(); itr!=reads.end();++itr){
+        for (int i=0;i<(itr->second).size()+1-shortk_length ;i++){
+            std::string shortk_for=(itr->second).substr(i,shortk_length);
+            std::string shortk_rev=shortk_for;
+            std::reverse(shortk_rev.begin(), shortk_rev.end()); // reverse
+		    for (int j = 0; j < shortk_length; ++j) { // complement
+			if (shortk_rev[j] == 'A') shortk_rev[j] = 'T';
+			else if (shortk_rev[j] == 'T') shortk_rev[j] = 'A';
+			else if (shortk_rev[j] == 'C') shortk_rev[j] = 'G';
+			else if (shortk_rev[j] == 'G') shortk_rev[j] = 'C';
+		    }
+
+            if (shortk_for<shortk_rev){
+                all_short_kmers[shortk_for]++;
+            }
+            else{
+                all_short_kmers[shortk_rev]++;
+            }
+        }
+    }
+    this->shortk_database=all_short_kmers;
+}
+#endif

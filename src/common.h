@@ -15,11 +15,15 @@
 #include<queue>
 #include<cmath>
 #include<omp.h>
+#include<robin_hood.h>
+
 
 typedef int Error;
 typedef std::unordered_map<std::string,std::string> ReadSet;
+typedef robin_hood::unordered_map<std::string,int> KmerCount;
 typedef std::set<std::string>  KmerSet;
 typedef int id_counter;
+uint64_t INF=(1LL<<60);
 
 char bit_to_base[4]={'A','C','G','T'};
 std::unordered_map<char,int> base_to_bit={{'A',0},{'C',1},{'G',2},{'T',3}};
