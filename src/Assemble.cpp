@@ -2,15 +2,16 @@
 #define ASSEMBLE_CPP
 #include"common.h"
 
-template<typename BITLENGTH>
+template<typename LARGE_BITSET>
 int Assemble (ReadFile &input_reads,Options &parameters){
-    KmerSet seed_kmer=input_reads.GetSeedKmer(parameters.kmer_length);
-    BF<BITLENGTH> first_bloom_filter=MakeBF<BITLENGTH>(input_reads.reads,parameters.filter_size,parameters.num_hashes,parameters.kmer_length); //make bloomfilter
-    std::cerr<<"bloom filter loaded"<<std::endl;
-    DeBruijnGraph<BITLENGTH > first_dbg(parameters.kmer_length,first_bloom_filter);   //make debruijngraph
-    std::cerr<<"make de bruijn graph"<<std::endl;
-    first_dbg.MakeDBG(seed_kmer,parameters.filter_size,parameters.num_hashes);
-    std::cerr<<"de bruijn graph loaded"<<std::endl;
+    input_reads.GetSeedKmer(parameters.kmer_length);
+    input_reads.CountShortKmer(parameters.shortk_length);
+    BF<LARGE_BITSET> first_bloom_filter=MakeBF<LARGE_BITSET>(input_reads.reads,input_reads.shortk_database,parameters.filter_size,parameters.num_hashes,parameters.kmer_length); //make bloomfilter
+    std::cerr<<"bloom filter loaded"<<"\n";
+    DeBruijnGraph<LARGE_BITSET > first_dbg(parameters.kmer_length,first_bloom_filter);   //make debruijngraph
+    std::cerr<<"make de bruijn graph"<<"\n";
+    first_dbg.MakeDBG(input_reads.seed_kmer,parameters.filter_size,parameters.num_hashes);
+    std::cerr<<"de bruijn graph loaded"<<"\n";
     first_dbg.CountNodeCoverage(input_reads.reads);
     first_dbg.PrintGraph();
 
