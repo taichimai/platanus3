@@ -54,8 +54,10 @@ BF<LARGE_BITSET> MakeBF(ReadSet &RS,KmerCount &KC,uint64_t filtersize ,uint8_t n
         {
             shortk_cov[i]=KC[target_read.substr(i,shortk_length)];
         }
+        std::cerr<<"get shortk cov"<<"\n";
         //use segment tree for estimating large kmer coverage
         SegmentTree shortk_tree(shortk_cov);
+        std::cerr<<"make segment tree"<<"\n";
 
         LARGE_BITSET kmer_Fw=GetFirstKmerForward<LARGE_BITSET>(target_read.substr(0,kmer_length));
         LARGE_BITSET kmer_Bw=GetFirstKmerBackward<LARGE_BITSET>(target_read.substr(0,kmer_length));
@@ -63,7 +65,8 @@ BF<LARGE_BITSET> MakeBF(ReadSet &RS,KmerCount &KC,uint64_t filtersize ,uint8_t n
         if (shortk_tree.getmin(0,kmer_length-shortk_length+1)>=cov_threshold){
             KmerItem=CompareBit(kmer_Fw,kmer_Bw,kmer_length*2);
             Kmer_BF.add(&KmerItem,kmer_length*2);
-        } 
+        }
+        std::cerr<<"test0: readsize="<<target_read.size()<<"\n";
         for (int i=kmer_length;i<target_read.size();i++){
             kmer_Fw=((kmer_Fw<<2)| end_bases[ base_to_bit[ target_read[i] ] + 4 ] );
             kmer_Bw=((kmer_Bw>>2)| end_bases[ base_to_bit[ trans_base[target_read[i]] ] ] );
@@ -73,6 +76,7 @@ BF<LARGE_BITSET> MakeBF(ReadSet &RS,KmerCount &KC,uint64_t filtersize ,uint8_t n
                 Kmer_BF.add(&KmerItem,kmer_length*2);
             } 
             Kmer_BF.add(&KmerItem,kmer_length*2);
+            std::cerr<<"test"<<i<<"\n";
         }
     }
     return Kmer_BF;
