@@ -50,14 +50,25 @@ BF<LARGE_BITSET> MakeBF(ReadSet &RS,KmerCount &KC,uint64_t filtersize ,uint8_t n
         //calculate 21-mer coverage
         std::vector<uint64_t> shortk_cov;
         shortk_cov.resize(target_read.size()+1-shortk_length,0);
-        for (int i = 0; i <target_read.size()+1-shortk_length; i++)
-        {
-            shortk_cov[i]=KC[target_read.substr(i,shortk_length)];
+        for (int i = 0; i <target_read.size()+1-shortk_length; i++){   
+            std::string shortk_for=target_read.substr(i,shortk_length);
+            std::string shortk_rev=shortk_for;
+            std::reverse(shortk_rev.begin(), shortk_rev.end()); // reverse
+		    for (int j = 0; j < shortk_length; ++j) { // complement
+			    if (shortk_rev[j] == 'A') shortk_rev[j] = 'T';
+			    else if (shortk_rev[j] == 'T') shortk_rev[j] = 'A';
+			    else if (shortk_rev[j] == 'C') shortk_rev[j] = 'G';
+			    else if (shortk_rev[j] == 'G') shortk_rev[j] = 'C';
+		    }
+            if (shortk_for<shortk_rev){
+                shortk_cov[i]=KC[shortk_for];
+            }
+            else{
+                shortk_cov[i]=KC[shortk_rev];
+            }
         }
-        std::cerr<<"get shortk cov"<<"\n";
         //use segment tree for estimating large kmer coverage
         SegmentTree shortk_tree(shortk_cov);
-        std::cerr<<"make segment tree"<<"\n";
 
         LARGE_BITSET kmer_Fw=GetFirstKmerForward<LARGE_BITSET>(target_read.substr(0,kmer_length));
         LARGE_BITSET kmer_Bw=GetFirstKmerBackward<LARGE_BITSET>(target_read.substr(0,kmer_length));
@@ -66,7 +77,6 @@ BF<LARGE_BITSET> MakeBF(ReadSet &RS,KmerCount &KC,uint64_t filtersize ,uint8_t n
             KmerItem=CompareBit(kmer_Fw,kmer_Bw,kmer_length*2);
             Kmer_BF.add(&KmerItem,kmer_length*2);
         }
-        std::cerr<<"test0: readsize="<<target_read.size()<<"\n";
         for (int i=kmer_length;i<target_read.size();i++){
             kmer_Fw=((kmer_Fw<<2)| end_bases[ base_to_bit[ target_read[i] ] + 4 ] );
             kmer_Bw=((kmer_Bw>>2)| end_bases[ base_to_bit[ trans_base[target_read[i]] ] ] );

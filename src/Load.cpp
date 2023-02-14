@@ -110,10 +110,10 @@ void ReadFile::CountShortKmer(int shortk_length){
             std::string shortk_rev=shortk_for;
             std::reverse(shortk_rev.begin(), shortk_rev.end()); // reverse
 		    for (int j = 0; j < shortk_length; ++j) { // complement
-			if (shortk_rev[j] == 'A') shortk_rev[j] = 'T';
-			else if (shortk_rev[j] == 'T') shortk_rev[j] = 'A';
-			else if (shortk_rev[j] == 'C') shortk_rev[j] = 'G';
-			else if (shortk_rev[j] == 'G') shortk_rev[j] = 'C';
+			    if (shortk_rev[j] == 'A') shortk_rev[j] = 'T';
+			    else if (shortk_rev[j] == 'T') shortk_rev[j] = 'A';
+			    else if (shortk_rev[j] == 'C') shortk_rev[j] = 'G';
+			    else if (shortk_rev[j] == 'G') shortk_rev[j] = 'C';
 		    }
 
             if (shortk_for<shortk_rev){
