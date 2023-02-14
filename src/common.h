@@ -14,6 +14,7 @@
 #include<tuple>
 #include<queue>
 #include<cmath>
+#include<algorithm>
 #include<omp.h>
 
 
