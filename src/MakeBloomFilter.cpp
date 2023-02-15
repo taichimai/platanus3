@@ -32,7 +32,7 @@ public:
 };
 
 template<typename LARGE_BITSET>
-BF<LARGE_BITSET> MakeBF(ReadSet &RS,KmerCount &KC,uint64_t filtersize ,uint8_t numhashes,int kmer_length,std::set<LARGE_BITSET> *seed_kmer){
+BF<LARGE_BITSET> MakeBF(ReadSet &RS,KmerCount &KC,uint64_t filtersize ,uint8_t numhashes,int kmer_length,std::set<std::string> *seed_kmer){
     BF<LARGE_BITSET> Kmer_BF(filtersize,numhashes);
 
     LARGE_BITSET A_right(0); LARGE_BITSET A_left=(A_right<<(kmer_length*2-2)); 
@@ -81,7 +81,8 @@ BF<LARGE_BITSET> MakeBF(ReadSet &RS,KmerCount &KC,uint64_t filtersize ,uint8_t n
             {     
                 Kmer_BF.add(&KmerItem,kmer_length*2);
                 if (!is_seedkmer_recorded){
-                    (*seed_kmer).insert(KmerItem);
+                    std::string recording_kmer=GetStringKmer<LARGE_BITSET>(kmer_Fw);
+                    (*seed_kmer).insert(recording_kmer);
                     is_seedkmer_recorded=true;
                 }
             }
@@ -95,7 +96,8 @@ BF<LARGE_BITSET> MakeBF(ReadSet &RS,KmerCount &KC,uint64_t filtersize ,uint8_t n
                 {                
                     Kmer_BF.add(&KmerItem,kmer_length*2);
                     if (!is_seedkmer_recorded){
-                        (*seed_kmer).insert(KmerItem);
+                        std::string recording_kmer=GetStringKmer<LARGE_BITSET>(kmer_Fw);
+                        (*seed_kmer).insert(recording_kmer);
                         is_seedkmer_recorded=true;
                     }
                 }

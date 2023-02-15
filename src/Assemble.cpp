@@ -2,11 +2,12 @@
 #define ASSEMBLE_CPP
 #include"common.h"
 
+
 template<typename LARGE_BITSET>
 int Assemble (ReadFile &input_reads,Options &parameters){
     input_reads.CountShortKmer(parameters.shortk_length);
     std::cerr<<"count short kmer"<<"\n";
-    std::set<LARGE_BITSET> seedkmer;
+    std::set<std::string> seedkmer;
     BF<LARGE_BITSET> first_bloom_filter=MakeBF<LARGE_BITSET>(input_reads.reads,input_reads.shortk_database,parameters.filter_size,parameters.num_hashes,parameters.kmer_length,&seedkmer); //make bloomfilter
     std::cerr<<"bloom filter loaded"<<"\n";
     std::cerr<<"get seed kmer"<<"\n";
