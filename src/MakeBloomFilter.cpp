@@ -11,6 +11,7 @@ private:
     uint64_t n;
     std::vector<uint64_t> node;
 
+
 public:
     SegmentTree(std::vector<uint64_t> v) {
         int sz = v.size();
@@ -31,7 +32,7 @@ public:
 };
 
 template<typename LARGE_BITSET>
-BF<LARGE_BITSET> MakeBF(ReadSet &RS,KmerCount &KC,uint64_t filtersize ,uint8_t numhashes,int kmer_length){
+BF<LARGE_BITSET> MakeBF(ReadSet &RS,KmerCount &KC,uint64_t filtersize ,uint8_t numhashes,int kmer_length,std::set<LARGE_BITSET> *seed_kmer){
     BF<LARGE_BITSET> Kmer_BF(filtersize,numhashes);
 
     LARGE_BITSET A_right(0); LARGE_BITSET A_left=(A_right<<(kmer_length*2-2)); 
@@ -69,24 +70,36 @@ BF<LARGE_BITSET> MakeBF(ReadSet &RS,KmerCount &KC,uint64_t filtersize ,uint8_t n
         }
         //use segment tree for estimating large kmer coverage
         SegmentTree shortk_tree(shortk_cov);
-
-        LARGE_BITSET kmer_Fw=GetFirstKmerForward<LARGE_BITSET>(target_read.substr(0,kmer_length));
-        LARGE_BITSET kmer_Bw=GetFirstKmerBackward<LARGE_BITSET>(target_read.substr(0,kmer_length));
+        bool is_seedkmer_recorded=false;
+        std::string first_kmer=target_read.substr(0,kmer_length);
+        LARGE_BITSET kmer_Fw=GetFirstKmerForward<LARGE_BITSET>(first_kmer);
+        LARGE_BITSET kmer_Bw=GetFirstKmerBackward<LARGE_BITSET>(first_kmer);
         LARGE_BITSET KmerItem;
         if (shortk_tree.getmin(0,kmer_length-shortk_length+1)>=cov_threshold){
             KmerItem=CompareBit(kmer_Fw,kmer_Bw,kmer_length*2);
-            Kmer_BF.add(&KmerItem,kmer_length*2);
+            #pragma omp critical
+            {     
+                Kmer_BF.add(&KmerItem,kmer_length*2);
+                if (!is_seedkmer_recorded){
+                    (*seed_kmer).insert(KmerItem);
+                    is_seedkmer_recorded=true;
+                }
+            }
         }
         for (int i=kmer_length;i<target_read.size();i++){
             kmer_Fw=((kmer_Fw<<2)| end_bases[ base_to_bit[ target_read[i] ] + 4 ] );
             kmer_Bw=((kmer_Bw>>2)| end_bases[ base_to_bit[ trans_base[target_read[i]] ] ] );
-            KmerItem=CompareBit(kmer_Fw,kmer_Bw,kmer_length*2);
             if (shortk_tree.getmin((i-kmer_length)+1,(i-kmer_length+1)+kmer_length-shortk_length+1)>=cov_threshold){
                 KmerItem=CompareBit(kmer_Fw,kmer_Bw,kmer_length*2);
-                Kmer_BF.add(&KmerItem,kmer_length*2);
-            } 
-            Kmer_BF.add(&KmerItem,kmer_length*2);
-            std::cerr<<"test"<<i<<"\n";
+                #pragma omp critical
+                {                
+                    Kmer_BF.add(&KmerItem,kmer_length*2);
+                    if (!is_seedkmer_recorded){
+                        (*seed_kmer).insert(KmerItem);
+                        is_seedkmer_recorded=true;
+                    }
+                }
+            }
         }
     }
     return Kmer_BF;

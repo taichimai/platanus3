@@ -9,14 +9,12 @@ class ReadFile{
         std::string file_type;
         Error error_code;
         uint64_t all_bases=0;
-        KmerSet seed_kmer;
         KmerCount shortk_database;
 
         ReadFile(std::string input_file_name);
         void LoadFile();
         void LoadFasta(ReadSet *loaded_reads,std::string file_name);
         void LoadFastq(ReadSet *loaded_reads,std::string file_name);
-        void GetSeedKmer(int kmer_length);
         void CountShortKmer(int shortk_length);
 };
 
@@ -91,15 +89,6 @@ void ReadFile::LoadFastq(ReadSet *loaded_reads,std::string file_name){
     }
     (*loaded_reads)[read_name]=seq;
     all_bases+=seq.size();
-}
-
-
-void ReadFile::GetSeedKmer(int kmer_length){
-    KmerSet edge_kmers;
-    for (auto itr=reads.begin();itr!=reads.end();++itr){
-        edge_kmers.insert((itr->second).substr(0,kmer_length));
-    }
-    this->seed_kmer=edge_kmers;
 }
 
 void ReadFile::CountShortKmer(int shortk_length){

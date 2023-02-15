@@ -54,7 +54,7 @@ class DeBruijnGraph{
         DeBruijnGraph(int k,BF<LARGE_BITSET> &first_bloom_filter);
 
         //methods
-        void MakeDBG(KmerSet &seedkmer,uint64_t filtersize ,uint8_t numhashes);
+        void MakeDBG(std::set<LARGE_BITSET> &seedkmer,uint64_t filtersize ,uint8_t numhashes);
         void SearchNode(LARGE_BITSET &target_kmer);
         LARGE_BITSET ExtendLeft(LARGE_BITSET &target_kmer,LARGE_BITSET &previous_kmer ,std::vector<char> *extend_bases,int previous_base);
         LARGE_BITSET ExtendRight(LARGE_BITSET &target_kmer,LARGE_BITSET &previous_kmer,std::vector<char> *extend_bases,int previous_base);
@@ -86,16 +86,16 @@ DeBruijnGraph<LARGE_BITSET>::DeBruijnGraph(int k,BF<LARGE_BITSET> &first_bloom_f
 }
 
 template<typename LARGE_BITSET>
-void DeBruijnGraph<LARGE_BITSET>::MakeDBG(KmerSet &seedkmer,uint64_t filtersize ,uint8_t numhashes){
+void DeBruijnGraph<LARGE_BITSET>::MakeDBG(std::set<LARGE_BITSET> &seedkmer,uint64_t filtersize ,uint8_t numhashes){
 
     for (auto itr=seedkmer.begin();itr!=seedkmer.end();++itr){
         std::cout<<"search new read"<<"\n";
-        LARGE_BITSET fw_kmer=GetFirstKmerForward<LARGE_BITSET>(*itr);
-        if (IsVisited(fw_kmer)) {
+        LARGE_BITSET first_kmer=(*itr);
+        if (IsVisited(first_kmer)) {
             std::cout<<"this read is visited"<<"\n";
             continue;
         }
-        visiting.push(fw_kmer);
+        visiting.push(first_kmer);
         while(!visiting.empty()){
             LARGE_BITSET visiting_kmer=visiting.front();
             visiting.pop();
