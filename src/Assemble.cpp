@@ -5,6 +5,7 @@
 
 template<typename LARGE_BITSET>
 int Assemble (ReadFile &input_reads,Options &parameters){
+    std::cerr<<"Assemble"<<"\n";
     input_reads.CountShortKmer(parameters.shortk_length);
     std::cerr<<"count short kmer"<<"\n";
     std::set<std::string> seedkmer;
@@ -30,6 +31,8 @@ int Assemble_k(ReadFile &input_reads,Options &parameters){
             return Assemble<std::bitset<10>>(input_reads,parameters);
         case 21:
             return Assemble<std::bitset<42>>(input_reads,parameters);
+        case 25:
+            return Assemble<std::bitset<50>>(input_reads,parameters);
         case 63:
             return Assemble<std::bitset<126>>(input_reads,parameters);
         case 501:

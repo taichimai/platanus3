@@ -20,15 +20,16 @@ public:
         for(int i=0; i<sz; i++) node[i+n-1] = v[i];
         for(int i=n-2; i>=0; i--) node[i] = std::min(node[2*i+1], node[2*i+2]);
     }
-    int getmin(int a, int b, int k=0, int l=0, int r=-1) {
+    uint64_t getmin(int a, int b, int k=0, int l=0, int r=-1) {
         if(r < 0) r = n;
         if(r <= a || b <= l) return INF;
         if(a <= l && r <= b) return node[k];
 
-        int vl = getmin(a, b, 2*k+1, l, (l+r)/2);
-        int vr = getmin(a, b, 2*k+2, (l+r)/2, r);
+        uint64_t vl = getmin(a, b, 2*k+1, l, (l+r)/2);
+        uint64_t vr = getmin(a, b, 2*k+2, (l+r)/2, r);
         return std::min(vl, vr);
     }
+
 };
 
 template<typename LARGE_BITSET>
@@ -70,6 +71,7 @@ BF<LARGE_BITSET> MakeBF(ReadSet &RS,KmerCount &KC,uint64_t filtersize ,uint8_t n
         }
         //use segment tree for estimating large kmer coverage
         SegmentTree shortk_tree(shortk_cov);
+
         bool is_seedkmer_recorded=false;
         std::string first_kmer=target_read.substr(0,kmer_length);
         LARGE_BITSET kmer_Fw=GetFirstKmerForward<LARGE_BITSET>(first_kmer);
@@ -78,6 +80,7 @@ BF<LARGE_BITSET> MakeBF(ReadSet &RS,KmerCount &KC,uint64_t filtersize ,uint8_t n
         if (shortk_tree.getmin(0,kmer_length-shortk_length+1)>=cov_threshold){
             KmerItem=CompareBit(kmer_Fw,kmer_Bw,kmer_length*2);
             Kmer_BF.add(&KmerItem,kmer_length*2);
+
             
             if (!is_seedkmer_recorded){
                 #pragma omp critical
