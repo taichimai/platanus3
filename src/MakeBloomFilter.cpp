@@ -77,29 +77,31 @@ BF<LARGE_BITSET> MakeBF(ReadSet &RS,KmerCount &KC,uint64_t filtersize ,uint8_t n
         LARGE_BITSET KmerItem;
         if (shortk_tree.getmin(0,kmer_length-shortk_length+1)>=cov_threshold){
             KmerItem=CompareBit(kmer_Fw,kmer_Bw,kmer_length*2);
-            #pragma omp critical
-            {     
-                Kmer_BF.add(&KmerItem,kmer_length*2);
-                if (!is_seedkmer_recorded){
+            Kmer_BF.add(&KmerItem,kmer_length*2);
+            
+            if (!is_seedkmer_recorded){
+                #pragma omp critical
+                {
                     std::string recording_kmer=GetStringKmer<LARGE_BITSET>(kmer_Fw);
                     (*seed_kmer).insert(recording_kmer);
-                    is_seedkmer_recorded=true;
                 }
-            }
+                is_seedkmer_recorded=true;
+            }       
         }
         for (int i=kmer_length;i<target_read.size();i++){
             kmer_Fw=((kmer_Fw<<2)| end_bases[ base_to_bit[ target_read[i] ] + 4 ] );
             kmer_Bw=((kmer_Bw>>2)| end_bases[ base_to_bit[ trans_base[target_read[i]] ] ] );
             if (shortk_tree.getmin((i-kmer_length)+1,(i-kmer_length+1)+kmer_length-shortk_length+1)>=cov_threshold){
                 KmerItem=CompareBit(kmer_Fw,kmer_Bw,kmer_length*2);
-                #pragma omp critical
-                {                
-                    Kmer_BF.add(&KmerItem,kmer_length*2);
-                    if (!is_seedkmer_recorded){
+                Kmer_BF.add(&KmerItem,kmer_length*2);
+                  
+                if (!is_seedkmer_recorded){
+                    #pragma omp critical
+                    {  
                         std::string recording_kmer=GetStringKmer<LARGE_BITSET>(kmer_Fw);
                         (*seed_kmer).insert(recording_kmer);
-                        is_seedkmer_recorded=true;
                     }
+                    is_seedkmer_recorded=true;
                 }
             }
         }

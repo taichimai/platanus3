@@ -11,9 +11,10 @@ int Assemble (ReadFile &input_reads,Options &parameters){
     BF<LARGE_BITSET> first_bloom_filter=MakeBF<LARGE_BITSET>(input_reads.reads,input_reads.shortk_database,parameters.filter_size,parameters.num_hashes,parameters.kmer_length,&seedkmer); //make bloomfilter
     std::cerr<<"bloom filter loaded"<<"\n";
     std::cerr<<"get seed kmer"<<"\n";
+    std::cerr<<"seed kmer num= "<<seedkmer.size()<<"\n";
+
     //make debruijngraph
     DeBruijnGraph<LARGE_BITSET> first_dbg(parameters.kmer_length,first_bloom_filter);
-    std::cerr<<"make de bruijn graph"<<"\n";
     first_dbg.MakeDBG(seedkmer,parameters.filter_size,parameters.num_hashes);
     std::cerr<<"de bruijn graph loaded"<<"\n";
     first_dbg.CountNodeCoverage(input_reads.reads);
