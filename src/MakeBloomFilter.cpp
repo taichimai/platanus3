@@ -43,9 +43,8 @@ BF<LARGE_BITSET> MakeBF(ReadSet &RS,KmerCount &KC,uint64_t filtersize ,uint8_t n
     std::vector<LARGE_BITSET> end_bases={A_left,C_left,G_left,T_left,A_right,C_right,G_right,T_right};
 
     const uint32_t shortk_length=21;
-    const uint64_t cov_threshold=3;
+    const uint64_t cov_threshold=2;
 
-    #pragma omp parallel for  num_threads(20) 
     for(size_t b=0;b<RS.bucket_count();b++)
     for(auto bi=RS.begin(b);bi!=RS.end(b);bi++){
         std::string target_read = (bi->second); 
@@ -83,11 +82,8 @@ BF<LARGE_BITSET> MakeBF(ReadSet &RS,KmerCount &KC,uint64_t filtersize ,uint8_t n
 
             
             if (!is_seedkmer_recorded){
-                #pragma omp critical
-                {
-                    std::string recording_kmer=GetStringKmer<LARGE_BITSET>(kmer_Fw);
-                    (*seed_kmer).insert(recording_kmer);
-                }
+                std::string recording_kmer=GetStringKmer<LARGE_BITSET>(kmer_Fw);
+                (*seed_kmer).insert(recording_kmer);
                 is_seedkmer_recorded=true;
             }       
         }
@@ -99,11 +95,8 @@ BF<LARGE_BITSET> MakeBF(ReadSet &RS,KmerCount &KC,uint64_t filtersize ,uint8_t n
                 Kmer_BF.add(&KmerItem,kmer_length*2);
                   
                 if (!is_seedkmer_recorded){
-                    #pragma omp critical
-                    {  
-                        std::string recording_kmer=GetStringKmer<LARGE_BITSET>(kmer_Fw);
-                        (*seed_kmer).insert(recording_kmer);
-                    }
+                    std::string recording_kmer=GetStringKmer<LARGE_BITSET>(kmer_Fw);
+                    (*seed_kmer).insert(recording_kmer);
                     is_seedkmer_recorded=true;
                 }
             }

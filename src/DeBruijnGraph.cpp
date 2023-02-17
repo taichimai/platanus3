@@ -312,8 +312,9 @@ void DeBruijnGraph<LARGE_BITSET>::AddJointNode(LARGE_BITSET &added_node){
 template<typename LARGE_BITSET>
 void DeBruijnGraph<LARGE_BITSET>::AddStraightNode(std::string &added_straight_node){
     straight_nodes_id++;
-    std::cout<<"add straight node"<<straight_nodes_id<<"\n";
+    std::cout<<"add straight node "<<straight_nodes_id<<"\n";
     straights[straight_nodes_id].sequence=added_straight_node;
+    straights[straight_nodes_id].id=straight_nodes_id;
 }
 
 template<typename LARGE_BITSET>
@@ -325,32 +326,39 @@ void DeBruijnGraph<LARGE_BITSET>::CountNodeCoverage(ReadSet &RS){
         LARGE_BITSET kmer_Fw=GetFirstKmerForward<LARGE_BITSET>(target_read.substr(0,kmer_length));
         LARGE_BITSET kmer_Bw=GetFirstKmerBackward<LARGE_BITSET>(target_read.substr(0,kmer_length));
         //add node coverage
-        AddNodeCoverage(kmer_Fw);
-        AddNodeCoverage(kmer_Bw);
-        //add path coverage
-        if (junctions.find(kmer_Fw)!=junctions.end()){
-            junctions[kmer_Fw].right_kmers_cov[base_to_bit[ target_read[kmer_length] ]]++;
-        }
-        else if (junctions.find(kmer_Bw)!=junctions.end()){
-            junctions[kmer_Bw].left_kmers_cov[base_to_bit[ trans_base[target_read[kmer_length]]]]++;
-        }
-        for (int i=kmer_length;i<target_read.size();i++){
-            kmer_Fw=((kmer_Fw<<2)| end_bases[ base_to_bit[ target_read[i] ] + 4 ] );
-            kmer_Bw=((kmer_Bw>>2)| end_bases[ base_to_bit[ trans_base[target_read[i]] ] ] );
-            //add node coverage
+        #pragma omp critical
+        {
             AddNodeCoverage(kmer_Fw);
             AddNodeCoverage(kmer_Bw);
             //add path coverage
             if (junctions.find(kmer_Fw)!=junctions.end()){
-                junctions[kmer_Fw].left_kmers_cov[base_to_bit[ target_read[i-kmer_length] ]]++;
-                if (i<target_read.size()-1){
-                    junctions[kmer_Fw].right_kmers_cov[base_to_bit[ target_read[i+1] ]]++;
-                }
+                junctions[kmer_Fw].right_kmers_cov[base_to_bit[ target_read[kmer_length] ]]++;
+                
             }
             else if (junctions.find(kmer_Bw)!=junctions.end()){
-                junctions[kmer_Bw].right_kmers_cov[base_to_bit[ trans_base[target_read[i-kmer_length]]]]++;
-                if (i<target_read.size()-1){
-                    junctions[kmer_Bw].left_kmers_cov[base_to_bit[ trans_base[target_read[i+1]]]]++;
+                junctions[kmer_Bw].left_kmers_cov[base_to_bit[ trans_base[target_read[kmer_length]]]]++;
+            }
+        }
+        for (int i=kmer_length;i<target_read.size();i++){
+            kmer_Fw=((kmer_Fw<<2)| end_bases[ base_to_bit[ target_read[i] ] + 4 ] );
+            kmer_Bw=((kmer_Bw>>2)| end_bases[ base_to_bit[ trans_base[target_read[i]] ] ] );
+            #pragma omp critical
+            {
+                //add node coverage
+                AddNodeCoverage(kmer_Fw);
+                AddNodeCoverage(kmer_Bw);
+                //add path coverage
+                if (junctions.find(kmer_Fw)!=junctions.end()){
+                    junctions[kmer_Fw].left_kmers_cov[base_to_bit[ target_read[i-kmer_length] ]]++;
+                    if (i<target_read.size()-1){
+                        junctions[kmer_Fw].right_kmers_cov[base_to_bit[ target_read[i+1] ]]++;
+                    }
+                }
+                else if (junctions.find(kmer_Bw)!=junctions.end()){
+                    junctions[kmer_Bw].right_kmers_cov[base_to_bit[ trans_base[target_read[i-kmer_length]]]]++;
+                    if (i<target_read.size()-1){
+                        junctions[kmer_Bw].left_kmers_cov[base_to_bit[ trans_base[target_read[i+1]]]]++;
+                    }
                 }
             }
         }
