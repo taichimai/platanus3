@@ -35,10 +35,16 @@ int Assemble_k(ReadFile &input_reads,Options &parameters){
             return Assemble<std::bitset<50>>(input_reads,parameters);
         case 63:
             return Assemble<std::bitset<126>>(input_reads,parameters);
+        case 101:
+            return Assemble<std::bitset<202>>(input_reads,parameters);
         case 501:
             return Assemble<std::bitset<1002>>(input_reads,parameters);
         case 1001:
             return Assemble<std::bitset<2002>>(input_reads,parameters);
+        case 2001:
+            return Assemble<std::bitset<4002>>(input_reads,parameters);
+        case 3001:
+            return Assemble<std::bitset<6002>>(input_reads,parameters);
         
         default:
             return 1;
