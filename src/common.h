@@ -15,6 +15,8 @@
 #include<queue>
 #include<cmath>
 #include<algorithm>
+#include<mutex>
+#include<thread>
 #include<omp.h>
 
 

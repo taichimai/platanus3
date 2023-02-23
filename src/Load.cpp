@@ -6,20 +6,22 @@ class ReadFile{
     public:
         ReadSet reads;
         std::string file_name;
+        uint32_t large_kmer_length;
         std::string file_type;
         Error error_code;
         uint64_t all_bases=0;
         KmerCount shortk_database;
 
-        ReadFile(std::string input_file_name);
+        ReadFile(Options &parameters);
         void LoadFile();
         void LoadFasta(ReadSet *loaded_reads,std::string file_name);
         void LoadFastq(ReadSet *loaded_reads,std::string file_name);
         void CountShortKmer(int shortk_length);
 };
 
-ReadFile::ReadFile(std::string input_file_name){
-    file_name=input_file_name;
+ReadFile::ReadFile(Options &parameters){
+    file_name=parameters.readfile_name;
+    large_kmer_length=parameters.kmer_length;
     file_type=file_name.substr(file_name.size()-5,5);
     if (not (file_type=="fasta" or file_type=="fastq")){
         error_code=1;
@@ -53,8 +55,10 @@ void ReadFile::LoadFasta(ReadSet *loaded_reads,std::string file_name){
     while (getline(fasta_lines,line)){
         if (line[0]=='>') {
             if (read_name!=""){
-                (*loaded_reads)[read_name]=seq;
-                all_bases+=seq.size();
+                if (seq.size()>=large_kmer_length){
+                    (*loaded_reads)[read_name]=seq;
+                    all_bases+=seq.size();
+                }
                 seq="";
             }
             read_name=line;
@@ -63,8 +67,10 @@ void ReadFile::LoadFasta(ReadSet *loaded_reads,std::string file_name){
             seq+=line;
         }
     }
-    (*loaded_reads)[read_name]=seq;
-    all_bases+=seq.size();
+    if (seq.size()>=large_kmer_length){
+        (*loaded_reads)[read_name]=seq;
+        all_bases+=seq.size();
+    }
 }
 
 void ReadFile::LoadFastq(ReadSet *loaded_reads,std::string file_name){
@@ -76,8 +82,10 @@ void ReadFile::LoadFastq(ReadSet *loaded_reads,std::string file_name){
     while (getline(fastq_lines,line)) {
         if (line_cnt%4==0){
             if (read_name!=""){
-                (*loaded_reads)[read_name]=seq;
-                all_bases+=seq.size();
+                if (seq.size()>=large_kmer_length){
+                    (*loaded_reads)[read_name]=seq;
+                    all_bases+=seq.size();
+                }
                 seq="";
             }
             read_name=line;
@@ -87,8 +95,10 @@ void ReadFile::LoadFastq(ReadSet *loaded_reads,std::string file_name){
         }
         line_cnt+=1;
     }
-    (*loaded_reads)[read_name]=seq;
-    all_bases+=seq.size();
+    if (seq.size()>=large_kmer_length){
+        (*loaded_reads)[read_name]=seq;
+        all_bases+=seq.size();
+    }
 }
 
 void ReadFile::CountShortKmer(int shortk_length){

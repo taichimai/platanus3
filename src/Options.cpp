@@ -8,6 +8,7 @@ class Options{
         std::string readfile_name;
         uint64_t filter_size=0;
         uint8_t num_hashes=10;
+        int threads_num=20;
         uint32_t  kmer_length=5;
         uint32_t  shortk_length=21;
         double  error_rate=0.0005;

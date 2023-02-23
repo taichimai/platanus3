@@ -16,7 +16,7 @@ int Assemble (ReadFile &input_reads,Options &parameters){
 
     //make debruijngraph
     DeBruijnGraph<LARGE_BITSET> first_dbg(parameters.kmer_length,first_bloom_filter);
-    first_dbg.MakeDBG(seedkmer,parameters.filter_size,parameters.num_hashes);
+    first_dbg.MakeDBG(seedkmer,parameters.filter_size,parameters.num_hashes,parameters.threads_num);
     std::cerr<<"de bruijn graph loaded"<<"\n";
     first_dbg.CountNodeCoverage(input_reads.reads);
     std::cerr<<"count node coverage"<<"\n";

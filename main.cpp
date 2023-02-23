@@ -11,7 +11,7 @@ int main(int argc,char **argv){
     //get parameter and data
     Options parameters;
     parameters.Parse(argc,argv);
-    ReadFile input_reads(parameters.readfile_name);
+    ReadFile input_reads(parameters);
     input_reads.LoadFile();
     parameters.EstimateBloomfilter(input_reads.all_bases);
     std::cerr<<"read file loaded"<<"\n";
