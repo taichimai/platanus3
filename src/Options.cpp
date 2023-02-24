@@ -8,7 +8,7 @@ class Options{
         std::string readfile_name;
         uint64_t filter_size=0;
         uint8_t num_hashes=10;
-        int threads_num=20;
+        int threads_num=8;
         uint32_t  kmer_length=5;
         uint32_t  shortk_length=21;
         double  error_rate=0.0005;
@@ -35,6 +35,8 @@ bool Options::Parse(int argc,char **argv){
             case 'k':
                 kmer_length =std::stoi(optarg);
                 break;
+            case 't':
+                threads_num =std::stoi(optarg);
             default: 
                 std::cerr << "Invalid option" << "\n";
                 return false;
