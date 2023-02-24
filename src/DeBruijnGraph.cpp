@@ -205,13 +205,13 @@ void DeBruijnGraph<LARGE_BITSET>::SearchNode(LARGE_BITSET target_kmer){
 
     //if node cannot extend
     if (left_end_kmer==right_end_kmer){
-        std::cout<<"this node cannot extend"<<"\n";
+        //std::cout<<"this node cannot extend"<<"\n";
         AddJunctionNode(left_end_kmer);
         return;
     }
     //get straight node
     if ((left_part.size()+right_part.size())>=1){
-        std::cout<<"extend node"<<"\n";
+        //std::cout<<"extend node"<<"\n";
         std::string straightnode=left_part+GetStringKmer(target_kmer)+right_part;
         AddJointNode(left_end_kmer);
         AddJointNode(right_end_kmer);
@@ -344,7 +344,7 @@ void DeBruijnGraph<LARGE_BITSET>::AddStraightEdge(LARGE_BITSET &left_joint_node,
 template<typename LARGE_BITSET>
 void DeBruijnGraph<LARGE_BITSET>::AddJunctionNode(LARGE_BITSET &added_node){
     if (IsVisited(added_node)){
-        std::cout<<"this is visited junction node"<<"\n";
+        //std::cout<<"this is visited junction node"<<"\n";
         return;
     }
     std::lock_guard<std::mutex> lock(mtx_junctions);
@@ -356,7 +356,7 @@ void DeBruijnGraph<LARGE_BITSET>::AddJunctionNode(LARGE_BITSET &added_node){
 template<typename LARGE_BITSET>
 void DeBruijnGraph<LARGE_BITSET>::AddJointNode(LARGE_BITSET &added_node){
     if (IsVisited(added_node)){
-        std::cout<<"this is visited joint node"<<"\n";
+        //std::cout<<"this is visited joint node"<<"\n";
         return;
     }
     std::lock_guard<std::mutex> lock(mtx_joints);
@@ -461,18 +461,24 @@ void DeBruijnGraph<LARGE_BITSET>::PrintGraph(){
                 writing_gfa<<"Junction_"<<(itr->second).id<<"\t+\t";
                 writing_gfa<<kmer_length-1<<"M"<<"\n";
             }
-            else {
-                //joint
-                if (joints.find(output_left_kmer)!=joints.end()){
+            else if (joints.find(output_left_kmer)!=joints.end()){
+                writing_gfa<<"L"<<"\t";
+                writing_gfa<<"Straight_"<<(*(joints[output_left_kmer].connected_straight)).id<<"\t+\t";
+                writing_gfa<<"Junction_"<<(itr->second).id<<"\t+\t";
+                writing_gfa<<kmer_length-1<<"M"<<"\n";
+            }
+            else{
+                //complement
+                LARGE_BITSET output_left_kmer_bw=GetComplementKmer(output_left_kmer);
+                if (junctions.find(output_left_kmer_bw)!=junctions.end()){
                     writing_gfa<<"L"<<"\t";
-                    writing_gfa<<"Straight_"<<(*(joints[output_left_kmer].connected_straight)).id<<"\t+\t";
+                    writing_gfa<<"Junction_"<<junctions[output_left_kmer_bw].id<<"\t-\t";
                     writing_gfa<<"Junction_"<<(itr->second).id<<"\t+\t";
                     writing_gfa<<kmer_length-1<<"M"<<"\n";
                 }
-                //complement?
-                else{
+                else if (joints.find(output_left_kmer_bw)!=joints.end()){
                     writing_gfa<<"L"<<"\t";
-                    writing_gfa<<"Junction_"<<(itr->second).id<<"\t-\t";
+                    writing_gfa<<"Straight_"<<(*(joints[output_left_kmer_bw].connected_straight)).id<<"\t-\t";
                     writing_gfa<<"Junction_"<<(itr->second).id<<"\t+\t";
                     writing_gfa<<kmer_length-1<<"M"<<"\n";
                 }
@@ -489,19 +495,26 @@ void DeBruijnGraph<LARGE_BITSET>::PrintGraph(){
                 writing_gfa<<"Junction_"<<junctions[output_right_kmer].id<<"\t+\t";
                 writing_gfa<<kmer_length-1<<"M"<<"\n";
             }
-            else {
+            else if (joints.find(output_right_kmer)!=joints.end()) {
                 //joint
-                if (joints.find(output_right_kmer)!=joints.end()){
+                writing_gfa<<"L"<<"\t";
+                writing_gfa<<"Junction_"<<(itr->second).id<<"\t+\t";
+                writing_gfa<<"Straight_"<<(*(joints[output_right_kmer].connected_straight)).id<<"\t+\t";
+                writing_gfa<<kmer_length-1<<"M"<<"\n";
+            }
+            else{
+                //complement
+                LARGE_BITSET output_right_kmer_bw=GetComplementKmer(output_right_kmer);
+                if (junctions.find(output_right_kmer_bw)!=junctions.end()){
                     writing_gfa<<"L"<<"\t";
                     writing_gfa<<"Junction_"<<(itr->second).id<<"\t+\t";
-                    writing_gfa<<"Straight_"<<(*(joints[output_right_kmer].connected_straight)).id<<"\t+\t";
+                    writing_gfa<<"Junction_"<<junctions[output_right_kmer_bw].id<<"\t-\t";
                     writing_gfa<<kmer_length-1<<"M"<<"\n";
                 }
-                //complement?
-                else{
+                else if (joints.find(output_right_kmer_bw)!=joints.end()){
                     writing_gfa<<"L"<<"\t";
                     writing_gfa<<"Junction_"<<(itr->second).id<<"\t+\t";
-                    writing_gfa<<"Junction_"<<(itr->second).id<<"\t-\t";
+                    writing_gfa<<"Straight_"<<(*(joints[output_right_kmer_bw].connected_straight)).id<<"\t-\t";
                     writing_gfa<<kmer_length-1<<"M"<<"\n";
                 }
             }
