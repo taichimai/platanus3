@@ -1,5 +1,5 @@
 CXX =g++
-FLAGS=-O3  -fopenmp
+FLAGS=-O3  -fopenmp -pthread
 LIBS= -I./src  -I/usr/local/opt/libomp/include
 MAIN=main.cpp
 PROGRAM = platanus3

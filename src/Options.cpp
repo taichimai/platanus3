@@ -1,6 +1,6 @@
 #ifndef OPTIONS_CPP
 #define OPTIONS_CPP
-#include<common.h>
+#include"common.h"
 
 
 class Options{
@@ -37,6 +37,7 @@ bool Options::Parse(int argc,char **argv){
                 break;
             case 't':
                 threads_num =std::stoi(optarg);
+                break;
             default: 
                 std::cerr << "Invalid option" << "\n";
                 return false;
