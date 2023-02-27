@@ -55,14 +55,11 @@ class DeBruijnGraph{
         std::mutex mtx_straights;
         std::mutex mtx_visiting;
 
-
-
-
         //constructor
         DeBruijnGraph(int k,BF<LARGE_BITSET> &first_bloom_filter);
 
         //methods
-        void MakeDBG(std::set<std::string> &seedkmer,uint64_t filtersize ,uint8_t numhashes,int threads_num);
+        void MakeDBG(std::set<std::string> &seedkmer,uint64_t filtersize ,uint8_t numhashes,int threads_num,Logging &logging);
         void SearchNode(LARGE_BITSET target_kmer);
         LARGE_BITSET ExtendLeft(LARGE_BITSET &target_kmer,LARGE_BITSET &previous_kmer ,std::vector<char> *extend_bases,int previous_base);
         LARGE_BITSET ExtendRight(LARGE_BITSET &target_kmer,LARGE_BITSET &previous_kmer,std::vector<char> *extend_bases,int previous_base);
@@ -94,8 +91,7 @@ DeBruijnGraph<LARGE_BITSET>::DeBruijnGraph(int k,BF<LARGE_BITSET> &first_bloom_f
 }
 
 template<typename LARGE_BITSET>
-void DeBruijnGraph<LARGE_BITSET>::MakeDBG(std::set<std::string> &seedkmer,uint64_t filtersize ,uint8_t numhashes,int threads_num){
-    //mutex(std::lock_guard<std::mutex> lock(mtx);)
+void DeBruijnGraph<LARGE_BITSET>::MakeDBG(std::set<std::string> &seedkmer,uint64_t filtersize ,uint8_t numhashes,int threads_num,Logging &logging){
     int seedk_cnt=0;
     for (auto itr=seedkmer.begin();itr!=seedkmer.end();++itr){
         seedk_cnt++;
@@ -108,6 +104,7 @@ void DeBruijnGraph<LARGE_BITSET>::MakeDBG(std::set<std::string> &seedkmer,uint64
         visiting.push(first_kmer);
 
         if (seedk_cnt%20!=0) continue;
+        logging.WriteLog("check seed kmer up to "+std::to_string(seedk_cnt));
 
         while(!visiting.empty()){
             std::vector<std::thread> ths;

@@ -1,6 +1,7 @@
 #ifndef OPTIONS_CPP
 #define OPTIONS_CPP
 #include"common.h"
+#include"logging.cpp"
 
 
 class Options{
@@ -15,12 +16,11 @@ class Options{
         
 
         void EstimateBloomfilter(uint64_t all_bases);
-        bool Parse(int argc,char **argv);
-        void PrintParameters();
-
+        bool Parse(int argc,char **argv,Logging &logging);
+        void PrintParameters(Logging &logging);
 };
 
-bool Options::Parse(int argc,char **argv){
+bool Options::Parse(int argc,char **argv,Logging &logging){
     int opt;
     const char* options="i:m:k:";
     while((opt = getopt(argc, argv, options)) != -1){
@@ -39,7 +39,7 @@ bool Options::Parse(int argc,char **argv){
                 threads_num =std::stoi(optarg);
                 break;
             default: 
-                std::cerr << "Invalid option" << "\n";
+                logging.WriteLog("Invalid option");
                 return false;
                 break;
         }
@@ -58,14 +58,12 @@ void Options::EstimateBloomfilter(uint64_t all_bases){
     std::cerr<<"item_number"<<" : "<<item_number<<"\n";
     std::cerr<<"get filter_size"<<" : "<<filter_size<<"\n";
 }
-
-void Options::PrintParameters(){
-    std::cerr<<"readfile_name"<<" : "<<readfile_name<<"\n";
-    std::cerr<<"filter_size"<<" : "<<filter_size<<"\n";
-    std::cerr<<"num_hashes"<<" : "<<(int)num_hashes<<"\n";
-    std::cerr<<"kmer_length"<<" : "<<kmer_length<<"\n";
-    std::cerr<<"error_rate"<<" : "<<error_rate<<"\n";
-    return;
+void Options::PrintParameters(Logging &logging){
+    logging.WriteLog("readfile_name : "+readfile_name);
+    logging.WriteLog("filter_size : "+std::to_string(filter_size));
+    logging.WriteLog("num_hashes : "+std::to_string((int)num_hashes));
+    logging.WriteLog("kmer_length : "+std::to_string(kmer_length));
+    logging.WriteLog("error_rate : "+std::to_string(error_rate));
 }
 
 
