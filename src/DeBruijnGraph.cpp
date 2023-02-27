@@ -115,6 +115,7 @@ void DeBruijnGraph<LARGE_BITSET>::MakeDBG(std::set<std::string> &seedkmer,uint64
                 visiting.pop();
                 mid_point.push(next_kmer);
             }
+            logging.WriteLog("mid point stacked");
 
             while(!mid_point.empty()){
                 LARGE_BITSET visiting_kmer=mid_point.front();
