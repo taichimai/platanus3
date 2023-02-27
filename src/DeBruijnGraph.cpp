@@ -60,7 +60,7 @@ class DeBruijnGraph{
 
         //methods
         void MakeDBG(std::set<std::string> &seedkmer,uint64_t filtersize ,uint8_t numhashes,int threads_num,Logging &logging);
-        void SearchNode(LARGE_BITSET target_kmer,Logging &logging);
+        void SearchNode(LARGE_BITSET target_kmer,const Logging &logging);
         LARGE_BITSET ExtendLeft(LARGE_BITSET &target_kmer,LARGE_BITSET &previous_kmer ,std::vector<char> *extend_bases,int previous_base);
         LARGE_BITSET ExtendRight(LARGE_BITSET &target_kmer,LARGE_BITSET &previous_kmer,std::vector<char> *extend_bases,int previous_base);
         bool IsVisited(LARGE_BITSET &seqrching_kmer);
@@ -120,7 +120,7 @@ void DeBruijnGraph<LARGE_BITSET>::MakeDBG(std::set<std::string> &seedkmer,uint64
             while(!mid_point.empty()){
                 LARGE_BITSET visiting_kmer=mid_point.front();
                 mid_point.pop();
-                ths.emplace_back([this,visiting_kmer,logging]() { this->SearchNode(visiting_kmer,logging);});
+                ths.emplace_back([this,visiting_kmer,&logging]() { this->SearchNode(visiting_kmer,logging);});
             }
 
             for (auto& t : ths) {
@@ -150,7 +150,7 @@ void DeBruijnGraph<LARGE_BITSET>::MakeDBG(std::set<std::string> &seedkmer,uint64
 }
 
 template<typename LARGE_BITSET>
-void DeBruijnGraph<LARGE_BITSET>::SearchNode(LARGE_BITSET target_kmer,Logging &logging){
+void DeBruijnGraph<LARGE_BITSET>::SearchNode(LARGE_BITSET target_kmer,const Logging &logging){
 
     if (IsVisited(target_kmer)) return;
     logging.WriteLog("search node");
