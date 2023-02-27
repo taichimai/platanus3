@@ -145,13 +145,15 @@ void DeBruijnGraph<LARGE_BITSET>::MakeDBG(std::set<std::string> &seedkmer,uint64
             for (auto& t : ths) {
                 t.join();
             }
+            logging.WriteLog("one cycle");
     } 
 }
 
 template<typename LARGE_BITSET>
-void DeBruijnGraph<LARGE_BITSET>::SearchNode(LARGE_BITSET target_kmer){
+void DeBruijnGraph<LARGE_BITSET>::SearchNode(LARGE_BITSET target_kmer Logging &logging){
 
     if (IsVisited(target_kmer)) return;
+    logging.WriteLog("search node");
 
     //search eight directions
     std::vector<LARGE_BITSET> stock_left;
