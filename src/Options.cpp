@@ -15,14 +15,14 @@ class Options{
         double  error_rate=0.0005;
         
 
-        void EstimateBloomfilter(uint64_t all_bases);
+        void EstimateBloomfilter(uint64_t all_bases,Logging &logging);
         bool Parse(int argc,char **argv,Logging &logging);
         void PrintParameters(Logging &logging);
 };
 
 bool Options::Parse(int argc,char **argv,Logging &logging){
     int opt;
-    const char* options="i:m:k:";
+    const char* options="i:m:k:t:";
     while((opt = getopt(argc, argv, options)) != -1){
         switch(opt)
         {
@@ -44,19 +44,19 @@ bool Options::Parse(int argc,char **argv,Logging &logging){
                 break;
         }
     }
-
     return true;
 }
 
-void Options::EstimateBloomfilter(uint64_t all_bases){
+void Options::EstimateBloomfilter(uint64_t all_bases,Logging &logging){
     if (filter_size!=0) return;
     double false_positive_rate=1.0e-6;
     uint64_t item_number=all_bases*error_rate*kmer_length;
     filter_size=(item_number*(-(std::log(false_positive_rate))))/std::pow(std::log(2),2);
     num_hashes=(std::log(2) * filter_size)/item_number;
-    std::cerr<<"all_bases"<<" : "<<all_bases<<"\n";
-    std::cerr<<"item_number"<<" : "<<item_number<<"\n";
-    std::cerr<<"get filter_size"<<" : "<<filter_size<<"\n";
+
+    logging.WriteLog("all_bases : "+std::to_string(all_bases));
+    logging.WriteLog("item_number :"+std::to_string(item_number));
+    logging.WriteLog("get filter_size :"+std::to_string(filter_size));
 }
 void Options::PrintParameters(Logging &logging){
     logging.WriteLog("readfile_name : "+readfile_name);

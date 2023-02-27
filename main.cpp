@@ -14,7 +14,7 @@ int main(int argc,char **argv){
     options.Parse(argc,argv,logging);
     ReadFile input_reads(options);
     input_reads.LoadFile();
-    options.EstimateBloomfilter(input_reads.all_bases);
+    options.EstimateBloomfilter(input_reads.all_bases,logging);
     logging.WriteLog("read file loaded");
     options.PrintParameters(logging);
 
