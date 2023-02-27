@@ -15,8 +15,11 @@ class Logging{
 
 void Logging::WriteLog(std::string text){
     std::lock_guard<std::mutex> lock(mtx_log);
-    progress.open(log_file, std::ios::out);
-    progress<<text<<"\n";
+    progress.open(log_file, std::ios::out | std::ios::app);
+    if (progress.is_open()) { 
+        progress<<text<<"\n";
+        progress.close();
+    }
 }
 
 
