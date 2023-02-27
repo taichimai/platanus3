@@ -1,7 +1,7 @@
 #ifndef OPTIONS_CPP
 #define OPTIONS_CPP
 #include"common.h"
-#include"logging.cpp"
+#include"Logging.cpp"
 
 
 class Options{
