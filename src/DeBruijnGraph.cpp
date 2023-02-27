@@ -120,7 +120,7 @@ void DeBruijnGraph<LARGE_BITSET>::MakeDBG(std::set<std::string> &seedkmer,uint64
             while(!mid_point.empty()){
                 LARGE_BITSET visiting_kmer=mid_point.front();
                 mid_point.pop();
-                ths.emplace_back(&DeBruijnGraph::SearchNode,this,visiting_kmer);
+                ths.emplace_back([this,visiting_kmer]() { this->SearchNode(visiting_kmer);});
             }
 
             for (auto& t : ths) {
@@ -140,7 +140,7 @@ void DeBruijnGraph<LARGE_BITSET>::MakeDBG(std::set<std::string> &seedkmer,uint64
             while(!mid_point.empty()){
                 LARGE_BITSET visiting_kmer=mid_point.front();
                 mid_point.pop();
-                ths.emplace_back(&DeBruijnGraph::SearchNode,this,visiting_kmer);
+                ths.emplace_back([this,visiting_kmer]() { this->SearchNode(visiting_kmer);});
             }
             for (auto& t : ths) {
                 t.join();
