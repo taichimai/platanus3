@@ -13,3 +13,107 @@ start graph extention
 de bruijn graph loaded
 count node coverage
 finish
+read file loaded
+readfile_name : testdata/shortreads.fasta
+filter_size : 50000000
+num_hashes : 10
+kmer_length : 25
+error_rate : 0.000500
+Assemble
+count short kmer
+bloom filter loaded
+get seed kmer
+seed kmer num= 19
+start graph extention
+search_first
+search continue
+search_first
+search continue
+search_first
+search continue
+search_first
+search continue
+search_first
+search continue
+search_first
+search_first
+search continue
+search continue
+search_first
+search continue
+search_first
+search continue
+search_first
+search continue
+search_first
+search continue
+search_first
+search continue
+search_first
+search continue
+search_first
+search continue
+search_first
+search continue
+search_first
+search continue
+search_first
+search continue
+search_first
+search_first
+search continue
+de bruijn graph loaded
+count node coverage
+finish
+read file loaded
+readfile_name : testdata/shortreads.fasta
+filter_size : 50000000
+num_hashes : 10
+kmer_length : 25
+error_rate : 0.000500
+Assemble
+count short kmer
+bloom filter loaded
+get seed kmer
+seed kmer num= 19
+start graph extention
+search_first
+search continue
+search_first
+search continue
+search_first
+search continue
+search_first
+search continue
+search_first
+search continue
+search_first
+search continue
+search_first
+search continue
+search_first
+search continue
+search_first
+search continue
+search_first
+search continue
+search_first
+search continue
+search_first
+search continue
+search_first
+search continue
+search_first
+search continue
+search_first
+search continue
+search_first
+search continue
+search_first
+search continue
+search_first
+search_first
+search continue
+de bruijn graph loaded
+count node coverage
+finish

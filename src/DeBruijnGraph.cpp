@@ -60,7 +60,7 @@ class DeBruijnGraph{
 
         //methods
         void MakeDBG(std::set<std::string> &seedkmer,uint64_t filtersize ,uint8_t numhashes,int threads_num,Logging &logging);
-        void SearchNode(LARGE_BITSET target_kmer);
+        void SearchNode(LARGE_BITSET target_kmer,Logging &logging);
         LARGE_BITSET ExtendLeft(LARGE_BITSET &target_kmer,LARGE_BITSET &previous_kmer ,std::vector<char> *extend_bases,int previous_base);
         LARGE_BITSET ExtendRight(LARGE_BITSET &target_kmer,LARGE_BITSET &previous_kmer,std::vector<char> *extend_bases,int previous_base);
         bool IsVisited(LARGE_BITSET &seqrching_kmer);
@@ -120,7 +120,11 @@ void DeBruijnGraph<LARGE_BITSET>::MakeDBG(std::set<std::string> &seedkmer,uint64
             while(!mid_point.empty()){
                 LARGE_BITSET visiting_kmer=mid_point.front();
                 mid_point.pop();
-                ths.emplace_back([this,visiting_kmer]() { this->SearchNode(visiting_kmer);});
+                ths.emplace_back(
+                    [this,visiting_kmer,&logging]() { 
+                        this->SearchNode(visiting_kmer,logging);
+                    }
+                );
             }
             int cnt=0;
 
@@ -144,7 +148,11 @@ void DeBruijnGraph<LARGE_BITSET>::MakeDBG(std::set<std::string> &seedkmer,uint64
             while(!mid_point.empty()){
                 LARGE_BITSET visiting_kmer=mid_point.front();
                 mid_point.pop();
-                ths.emplace_back([this,visiting_kmer]() { this->SearchNode(visiting_kmer);});
+                ths.emplace_back(
+                    [this,visiting_kmer,&logging]() {
+                        this->SearchNode(visiting_kmer,logging);
+                    }
+                );
             }
             for (auto& t : ths) {
                 t.join();
@@ -153,10 +161,10 @@ void DeBruijnGraph<LARGE_BITSET>::MakeDBG(std::set<std::string> &seedkmer,uint64
 }
 
 template<typename LARGE_BITSET>
-void DeBruijnGraph<LARGE_BITSET>::SearchNode(LARGE_BITSET target_kmer){
-    std::cout<<"search_first"<<"\n";
+void DeBruijnGraph<LARGE_BITSET>::SearchNode(LARGE_BITSET target_kmer,Logging &logging){
+    logging.WriteLog("search_first");
     if (IsVisited(target_kmer)) return;
-    std::cout<<"search"<<"\n";
+    logging.WriteLog("search continue");
 
     //search eight directions
     std::vector<LARGE_BITSET> stock_left;
@@ -188,7 +196,7 @@ void DeBruijnGraph<LARGE_BITSET>::SearchNode(LARGE_BITSET target_kmer){
         left_part+=extend_bases_left[i];
     }
     if (IsVisited(left_end_kmer)){
-        std::cout<<"this straight left part has already visited"<<"\n";
+        //std::cout<<"this straight left part has already visited"<<"\n";
         return;
     } 
 
@@ -202,19 +210,19 @@ void DeBruijnGraph<LARGE_BITSET>::SearchNode(LARGE_BITSET target_kmer){
         right_part+=extend_bases_right[i]; 
     }
     if (IsVisited(right_end_kmer)){
-      std::cout<<"this straight right part has already visited"<<"\n";
+      //std::cout<<"this straight right part has already visited"<<"\n";
       return;
     } 
 
     //if node cannot extend
     if (left_end_kmer==right_end_kmer){
-        std::cout<<"this node cannot extend"<<"\n";
+        //std::cout<<"this node cannot extend"<<"\n";
         AddJunctionNode(left_end_kmer);
         return;
     }
     //get straight node
     if ((left_part.size()+right_part.size())>=1){
-        std::cout<<"extend node"<<"\n";
+        //std::cout<<"extend node"<<"\n";
         std::string straightnode=left_part+GetStringKmer(target_kmer)+right_part;
         AddJointNode(left_end_kmer);
         AddJointNode(right_end_kmer);
@@ -347,24 +355,24 @@ void DeBruijnGraph<LARGE_BITSET>::AddStraightEdge(LARGE_BITSET &left_joint_node,
 template<typename LARGE_BITSET>
 void DeBruijnGraph<LARGE_BITSET>::AddJunctionNode(LARGE_BITSET &added_node){
     if (IsVisited(added_node)){
-        std::cout<<"this is visited junction node"<<"\n";
+        //std::cout<<"this is visited junction node"<<"\n";
         return;
     }
     std::lock_guard<std::mutex> lock(mtx_junctions);
     junction_nodes_id++;
-    std::cout<<"add junction node "<<junction_nodes_id<<"\n";
+    //std::cout<<"add junction node "<<junction_nodes_id<<"\n";
     junctions[added_node].id=junction_nodes_id;
 }
 
 template<typename LARGE_BITSET>
 void DeBruijnGraph<LARGE_BITSET>::AddJointNode(LARGE_BITSET &added_node){
     if (IsVisited(added_node)){
-        std::cout<<"this is visited joint node"<<"\n";
+        //std::cout<<"this is visited joint node"<<"\n";
         return;
     }
     std::lock_guard<std::mutex> lock(mtx_joints);
     joint_nodes_id++;
-    std::cout<<"add joint node "<<joint_nodes_id<<"\n";
+    //std::cout<<"add joint node "<<joint_nodes_id<<"\n";
     joints[added_node].id=joint_nodes_id;
 }
 
