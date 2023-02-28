@@ -127,7 +127,7 @@ void DeBruijnGraph<LARGE_BITSET>::MakeDBG(std::set<std::string> &seedkmer,uint64
             for (auto& t : ths) {
                 t.join();
                 logging.WriteLog("check"+std::to_string(cnt));
-                cnt++:
+                cnt++;
 
             }
         } 
