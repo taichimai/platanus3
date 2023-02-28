@@ -1,0 +1,6 @@
+platanus3
+run.sh
+testdata/
+de_bruijn_graph.gfa
+.vscode/
+platanus3.log
