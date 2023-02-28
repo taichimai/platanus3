@@ -154,7 +154,7 @@ void DeBruijnGraph<LARGE_BITSET>::MakeDBG(std::set<std::string> &seedkmer,uint64
 
 template<typename LARGE_BITSET>
 void DeBruijnGraph<LARGE_BITSET>::SearchNode(LARGE_BITSET target_kmer){
-
+    std::cout<<"search_first"<<"\n";
     if (IsVisited(target_kmer)) return;
     std::cout<<"search"<<"\n";
 
