@@ -197,6 +197,7 @@ void DeBruijnGraph<LARGE_BITSET>::SearchNode(LARGE_BITSET target_kmer,Logging &l
     }
     if (IsVisited(left_end_kmer)){
         //std::cout<<"this straight left part has already visited"<<"\n";
+         logging.WriteLog("this straight left part has already visited");
         return;
     } 
 
@@ -211,18 +212,23 @@ void DeBruijnGraph<LARGE_BITSET>::SearchNode(LARGE_BITSET target_kmer,Logging &l
     }
     if (IsVisited(right_end_kmer)){
       //std::cout<<"this straight right part has already visited"<<"\n";
+      logging.WriteLog("this straight right part has already visited");
       return;
     } 
 
     //if node cannot extend
     if (left_end_kmer==right_end_kmer){
         //std::cout<<"this node cannot extend"<<"\n";
+        logging.WriteLog("this node cannot extend");
+
         AddJunctionNode(left_end_kmer);
         return;
     }
     //get straight node
     if ((left_part.size()+right_part.size())>=1){
         //std::cout<<"extend node"<<"\n";
+        logging.WriteLog("extend node");
+
         std::string straightnode=left_part+GetStringKmer(target_kmer)+right_part;
         AddJointNode(left_end_kmer);
         AddJointNode(right_end_kmer);
