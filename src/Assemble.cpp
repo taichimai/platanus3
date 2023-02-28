@@ -16,9 +16,9 @@ int Assemble (ReadFile &input_reads,Options &options,Logging &logging){
     logging.WriteLog("seed kmer num= "+std::to_string(seedkmer.size()));
 
     //make debruijngraph
-    DeBruijnGraph<LARGE_BITSET> first_dbg(options.kmer_length,first_bloom_filter);
+    DeBruijnGraph<LARGE_BITSET> first_dbg(options.kmer_length,first_bloom_filter,logging);
     logging.WriteLog("start graph extention");
-    first_dbg.MakeDBG(seedkmer,options.filter_size,options.num_hashes,options.threads_num,logging);
+    first_dbg.MakeDBG(seedkmer,options.filter_size,options.num_hashes,options.threads_num);
 
     logging.WriteLog("de bruijn graph loaded");
     first_dbg.CountNodeCoverage(input_reads.reads);
