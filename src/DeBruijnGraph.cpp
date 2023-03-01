@@ -65,7 +65,7 @@ class DeBruijnGraph{
         LARGE_BITSET ExtendRight(LARGE_BITSET &target_kmer,LARGE_BITSET &previous_kmer,std::vector<char> *extend_bases,int previous_base);
         bool IsVisited(LARGE_BITSET &seqrching_kmer);
 
-        bool IsRecorded(BF<LARGE_BITSET> &bloomfilter,LARGE_BITSET &seqrching_kmer);
+        bool IsRecorded(BF<LARGE_BITSET> &bloomfilter,LARGE_BITSET seqrching_kmer);
         void CheckDirections(std::vector<LARGE_BITSET> *stock_left,std::vector<LARGE_BITSET> *stock_right,LARGE_BITSET &target_kmer,int ignored_direction);
 
         void AddJunctionNode(LARGE_BITSET &added_node);
@@ -332,9 +332,11 @@ bool DeBruijnGraph<LARGE_BITSET>::IsVisited(LARGE_BITSET &seqrching_kmer){
 }
 
 template<typename LARGE_BITSET>
-bool DeBruijnGraph<LARGE_BITSET>::IsRecorded(BF<LARGE_BITSET> &bloomfilter,LARGE_BITSET &seqrching_kmer){
+bool DeBruijnGraph<LARGE_BITSET>::IsRecorded(BF<LARGE_BITSET> &bloomfilter,LARGE_BITSET seqrching_kmer){
+    (*logging).WriteLog("is record?");
     LARGE_BITSET seqrching_kmer_bw=GetComplementKmer(seqrching_kmer);
     LARGE_BITSET query_kmer=CompareBit(seqrching_kmer,seqrching_kmer_bw,bitset_length);
+    (*logging).WriteLog("get ready");
     return bloomfilter.possiblyContains(&query_kmer,bitset_length);
 }
 
