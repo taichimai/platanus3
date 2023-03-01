@@ -348,18 +348,22 @@ void DeBruijnGraph<LARGE_BITSET>::CheckDirections(std::vector<LARGE_BITSET> *sto
       if (i<4){
           (*logging).WriteLog("critical section1: i="+std::to_string(i));
           adjacent_kmer=(back_shifted_kmer  | end_bases[i] );
+          (*logging).WriteLog("critical section1.5: i="+std::to_string(i));
           if (IsRecorded(*all_kmers,adjacent_kmer)) {
                 (*logging).WriteLog("critical section2: i="+std::to_string(i));
                 (*stock_left).push_back(adjacent_kmer);
           };
+          (*logging).WriteLog("critical section3: i="+std::to_string(i));
       }
       else{
           (*logging).WriteLog("critical section1: i="+std::to_string(i));
           adjacent_kmer=(front_shifted_kmer | end_bases[i] ); 
+          (*logging).WriteLog("critical section1.5: i="+std::to_string(i));
           if (IsRecorded(*all_kmers,adjacent_kmer)) {
                 (*logging).WriteLog("critical section２: i="+std::to_string(i));
                 (*stock_right).push_back(adjacent_kmer);
           }
+          (*logging).WriteLog("critical section3: i="+std::to_string(i));
       }
     }
 }
