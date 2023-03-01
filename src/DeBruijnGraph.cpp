@@ -350,7 +350,7 @@ void DeBruijnGraph<LARGE_BITSET>::CheckDirections(std::vector<LARGE_BITSET> *sto
           adjacent_kmer=(back_shifted_kmer  | end_bases[i] );
           if (IsRecorded(*all_kmers,adjacent_kmer)) {
                 (*logging).WriteLog("critical section2: i="+std::to_string(i));
-                (*stock_left).push_back(adjacent_kmer)
+                (*stock_left).push_back(adjacent_kmer);
           };
       }
       else{
