@@ -346,12 +346,20 @@ void DeBruijnGraph<LARGE_BITSET>::CheckDirections(std::vector<LARGE_BITSET> *sto
     for (int i=0;i<end_bases.size();i++){
       if (i==ignored_direction) continue; 
       if (i<4){
-          adjacent_kmer=(back_shifted_kmer  | end_bases[i] );  
-          if (IsRecorded(*all_kmers,adjacent_kmer)) (*stock_left).push_back(adjacent_kmer);
+          (*logging).WriteLog("critical section1: i="+std::to_string(i));
+          adjacent_kmer=(back_shifted_kmer  | end_bases[i] );
+          if (IsRecorded(*all_kmers,adjacent_kmer)) {
+                (*logging).WriteLog("critical section2: i="+std::to_string(i));
+                (*stock_left).push_back(adjacent_kmer)
+          };
       }
       else{
+          (*logging).WriteLog("critical section1: i="+std::to_string(i));
           adjacent_kmer=(front_shifted_kmer | end_bases[i] ); 
-          if (IsRecorded(*all_kmers,adjacent_kmer)) (*stock_right).push_back(adjacent_kmer);
+          if (IsRecorded(*all_kmers,adjacent_kmer)) {
+                (*logging).WriteLog("critical section２: i="+std::to_string(i));
+                (*stock_right).push_back(adjacent_kmer);
+          }
       }
     }
 }
