@@ -14,14 +14,16 @@
 #include<tuple>
 #include<queue>
 #include<cmath>
+#include<algorithm>
+#include<mutex>
+#include<thread>
 #include<omp.h>
-#include<robin_hood.h>
 
 
 typedef int Error;
 typedef std::unordered_map<std::string,std::string> ReadSet;
-typedef robin_hood::unordered_map<std::string,int> KmerCount;
-typedef std::set<std::string>  KmerSet;
+typedef std::unordered_map<std::string,uint64_t> KmerCount;
+//typedef std::set<std::string>  KmerSet;
 typedef int id_counter;
 uint64_t INF=(1LL<<60);
 
