@@ -61,8 +61,8 @@ class DeBruijnGraph{
         //methods
         void MakeDBG(std::set<std::string> &seedkmer,uint64_t filtersize ,uint8_t numhashes,int threads_num);
         void SearchNode(LARGE_BITSET target_kmer);
-        LARGE_BITSET ExtendLeft(LARGE_BITSET &target_kmer,LARGE_BITSET &previous_kmer ,std::vector<char> *extend_bases,int previous_base);
-        LARGE_BITSET ExtendRight(LARGE_BITSET &target_kmer,LARGE_BITSET &previous_kmer,std::vector<char> *extend_bases,int previous_base);
+        LARGE_BITSET ExtendLeft(LARGE_BITSET target_kmer,LARGE_BITSET previous_kmer ,std::vector<char> *extend_bases,int previous_base);
+        LARGE_BITSET ExtendRight(LARGE_BITSET target_kmer,LARGE_BITSET previous_kmer,std::vector<char> *extend_bases,int previous_base);
         bool IsVisited(LARGE_BITSET &seqrching_kmer);
 
         bool IsRecorded(BF<LARGE_BITSET> &bloomfilter,LARGE_BITSET seqrching_kmer);
@@ -229,93 +229,82 @@ void DeBruijnGraph<LARGE_BITSET>::SearchNode(LARGE_BITSET target_kmer){
     return;
 }
 
+
 template<typename LARGE_BITSET>
-LARGE_BITSET DeBruijnGraph<LARGE_BITSET>::ExtendLeft(LARGE_BITSET &target_kmer,LARGE_BITSET &previous_kmer ,std::vector<char> *extend_bases,int previous_base){
-    (*logging).WriteLog("section1-L");
-    //search eight directions(except Node before transition)
+LARGE_BITSET DeBruijnGraph<LARGE_BITSET>::ExtendLeft(LARGE_BITSET target_kmer,LARGE_BITSET previous_kmer ,std::vector<char> *extend_bases,int previous_base){
     std::vector<LARGE_BITSET> stock_left;
     std::vector<LARGE_BITSET> stock_right;
     CheckDirections(&stock_left,&stock_right,target_kmer,4+previous_base);
-    (*logging).WriteLog("section2-L");
-    if (stock_left.size()==1 and stock_right.size()==0){
-        (*logging).WriteLog("section3-1-L");
-        //if visited
+    while(stock_left.size()==1 and stock_right.size()==0){
         if (IsVisited(target_kmer)){
-            (*logging).WriteLog("section3-1-1-L");
             (*extend_bases).clear();
-            (*logging).WriteLog("section4-1-1-L");
             return target_kmer;
         }
-        (*logging).WriteLog("section3-1-2-L");
         (*extend_bases).push_back(bit_to_base[2*target_kmer[bitset_length-1]+target_kmer[bitset_length-2]]);
-        int right_base=2*target_kmer[1]+target_kmer[0];
-        (*logging).WriteLog("section4-1-2-L");
-        return ExtendLeft(stock_left[0],target_kmer,extend_bases,right_base);
+
+        previous_base=2*target_kmer[1]+target_kmer[0];
+        previous_kmer=target_kmer;
+        target_kmer=stock_left[0];
+        stock_left.clear();
+        stock_right.clear();
+        CheckDirections(&stock_left,&stock_right,target_kmer,4+previous_base);
     }
-    //junction
-    else{
-        (*logging).WriteLog("section3-2-L");
-        if (!IsVisited(target_kmer)){
-            (*logging).WriteLog("section4-2-L");
-            mtx_visiting.lock();
-            for (auto itr=stock_left.begin();itr!=stock_left.end();++itr){
-                visiting.push(*itr);
-            }
-            for (auto itr=stock_right.begin();itr!=stock_right.end();++itr){
-                visiting.push(*itr);
-            }
-            mtx_visiting.unlock();
-            (*logging).WriteLog("section5-2-L");
-            AddJunctionNode(target_kmer);
+
+    if (!IsVisited(target_kmer)){
+        mtx_visiting.lock();
+        for (auto itr=stock_left.begin();itr!=stock_left.end();++itr){
+            visiting.push(*itr);
         }
-        (*logging).WriteLog("section6-2-L");
-        return previous_kmer;
+        for (auto itr=stock_right.begin();itr!=stock_right.end();++itr){
+            visiting.push(*itr);
+        }
+        mtx_visiting.unlock();
+        AddJunctionNode(target_kmer);
     }
+    return previous_kmer;
 }
 
+
 template<typename LARGE_BITSET>
-LARGE_BITSET DeBruijnGraph<LARGE_BITSET>::ExtendRight(LARGE_BITSET &target_kmer,LARGE_BITSET &previous_kmer,std::vector<char> *extend_bases,int previous_base){
-    (*logging).WriteLog("section1");
-    //search eight directions(except Node before transition)
+LARGE_BITSET DeBruijnGraph<LARGE_BITSET>::ExtendRight(LARGE_BITSET target_kmer,LARGE_BITSET previous_kmer,std::vector<char> *extend_bases,int previous_base){
+
     std::vector<LARGE_BITSET> stock_left;
     std::vector<LARGE_BITSET> stock_right;
+
     CheckDirections(&stock_left,&stock_right,target_kmer,previous_base);
-    (*logging).WriteLog("section2");
-    if (stock_left.size()==0 and stock_right.size()==1){
-        (*logging).WriteLog("section3-1");
-        //if visited
+    while(stock_left.size()==0 and stock_right.size()==1){
         if (IsVisited(target_kmer)){
-            (*logging).WriteLog("section3-1-1");
             (*extend_bases).clear();
-            (*logging).WriteLog("section4-1-1");
             return target_kmer;
         }
-        (*logging).WriteLog("section3-1-2");
         (*extend_bases).push_back(bit_to_base[2*target_kmer[1]+target_kmer[0]]);
-        int left_base=2*target_kmer[bitset_length-1]+target_kmer[bitset_length-2];
-        (*logging).WriteLog("section4-1-2");
-        return ExtendRight(stock_right[0],target_kmer,extend_bases,left_base);
+
+        previous_base=2*target_kmer[bitset_length-1]+target_kmer[bitset_length-2];
+        previous_kmer=target_kmer;
+        target_kmer=stock_right[0];
+        stock_left.clear();
+        stock_right.clear();
+        CheckDirections(&stock_left,&stock_right,target_kmer,previous_base);
     }
-    //junction
-    else{
-        (*logging).WriteLog("section3-2");
-        if (!IsVisited(target_kmer)){
-            (*logging).WriteLog("section4-2");
-            mtx_visiting.lock();
-            for (auto itr=stock_left.begin();itr!=stock_left.end();++itr){
-                visiting.push(*itr);
-            }
-            for (auto itr=stock_right.begin();itr!=stock_right.end();++itr){
-                visiting.push(*itr);
-            }
-            mtx_visiting.unlock();
-            (*logging).WriteLog("section5-2");
-            AddJunctionNode(target_kmer);
+
+    if (!IsVisited(target_kmer)){
+        mtx_visiting.lock();
+        for (auto itr=stock_left.begin();itr!=stock_left.end();++itr){
+            visiting.push(*itr);
         }
-        (*logging).WriteLog("section6-2");
-        return previous_kmer;
+        for (auto itr=stock_right.begin();itr!=stock_right.end();++itr){
+            visiting.push(*itr);
+        }
+        mtx_visiting.unlock();
+        AddJunctionNode(target_kmer);
     }
+    return previous_kmer;   
 }
+
+
+
+
+
 
 template<typename LARGE_BITSET>
 bool DeBruijnGraph<LARGE_BITSET>::IsVisited(LARGE_BITSET &seqrching_kmer){
