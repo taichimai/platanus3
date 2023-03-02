@@ -322,10 +322,9 @@ bool DeBruijnGraph<LARGE_BITSET>::IsVisited(LARGE_BITSET &seqrching_kmer){
 
 template<typename LARGE_BITSET>
 bool DeBruijnGraph<LARGE_BITSET>::IsRecorded(BF<LARGE_BITSET> &bloomfilter,LARGE_BITSET seqrching_kmer){
-    (*logging).WriteLog("is record?");
+
     LARGE_BITSET seqrching_kmer_bw=GetComplementKmer(seqrching_kmer);
     LARGE_BITSET query_kmer=CompareBit(seqrching_kmer,seqrching_kmer_bw,bitset_length);
-    (*logging).WriteLog("get ready");
     return bloomfilter.possiblyContains(&query_kmer,bitset_length);
 }
 
@@ -337,24 +336,16 @@ void DeBruijnGraph<LARGE_BITSET>::CheckDirections(std::vector<LARGE_BITSET> *sto
     for (int i=0;i<end_bases.size();i++){
       if (i==ignored_direction) continue; 
       if (i<4){
-          (*logging).WriteLog("critical section1: i="+std::to_string(i));
           adjacent_kmer=(back_shifted_kmer  | end_bases[i] );
-          (*logging).WriteLog("critical section1.5: i="+std::to_string(i));
           if (IsRecorded(*all_kmers,adjacent_kmer)) {
-                (*logging).WriteLog("critical section2: i="+std::to_string(i));
                 (*stock_left).push_back(adjacent_kmer);
           };
-          (*logging).WriteLog("critical section3: i="+std::to_string(i));
       }
       else{
-          (*logging).WriteLog("critical section1: i="+std::to_string(i));
           adjacent_kmer=(front_shifted_kmer | end_bases[i] ); 
-          (*logging).WriteLog("critical section1.5: i="+std::to_string(i));
           if (IsRecorded(*all_kmers,adjacent_kmer)) {
-                (*logging).WriteLog("critical section２: i="+std::to_string(i));
                 (*stock_right).push_back(adjacent_kmer);
           }
-          (*logging).WriteLog("critical section3: i="+std::to_string(i));
       }
     }
 }
