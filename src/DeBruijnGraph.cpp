@@ -95,6 +95,7 @@ void DeBruijnGraph<LARGE_BITSET>::MakeDBG(std::set<std::string> &seedkmer,uint64
     int seedk_cnt=0;
     for (auto itr=seedkmer.begin();itr!=seedkmer.end();++itr){
         seedk_cnt++;
+        (*logging).WriteLog("seed_k_"+std::to_string(seedk_cnt)); 
       
         (*logging).WriteLog("search new read"); 
         LARGE_BITSET first_kmer=GetFirstKmerForward<LARGE_BITSET>(*itr);
@@ -156,9 +157,7 @@ void DeBruijnGraph<LARGE_BITSET>::MakeDBG(std::set<std::string> &seedkmer,uint64
 
 template<typename LARGE_BITSET>
 void DeBruijnGraph<LARGE_BITSET>::SearchNode(LARGE_BITSET target_kmer){
-    (*logging).WriteLog("check visited");
     if (IsVisited(target_kmer)) return;
-    (*logging).WriteLog("this node has not visited");
 
     //search eight directions
     std::vector<LARGE_BITSET> stock_left;
@@ -191,7 +190,6 @@ void DeBruijnGraph<LARGE_BITSET>::SearchNode(LARGE_BITSET target_kmer){
         left_part+=extend_bases_left[i];
     }
     if (IsVisited(left_end_kmer)){
-        //std::cout<<"this straight left part has already visited"<<"\n";
         (*logging).WriteLog("this straight left part has already visited");
         return;
     } 
@@ -379,6 +377,10 @@ void DeBruijnGraph<LARGE_BITSET>::AddJointNode(LARGE_BITSET &added_node){
 template<typename LARGE_BITSET>
 void DeBruijnGraph<LARGE_BITSET>::AddStraightNode(std::string &added_straight_node,LARGE_BITSET &left_joint_node,LARGE_BITSET &right_joint_node){
     std::lock_guard<std::mutex> lock(mtx_straights);
+    if (IsVisited(left_joint_node)){
+        (*logging).WriteLog("prevented new registrations");
+        return;
+    } 
     straight_nodes_id++;
     (*logging).WriteLog("add straight node "+std::to_string(straight_nodes_id));
     straights[straight_nodes_id].sequence=added_straight_node;
