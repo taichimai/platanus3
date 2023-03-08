@@ -13,11 +13,11 @@ private:
 
 
 public:
-  SegmentTree(std::vector<uint64_t> v) {
+  SegmentTree(std::vector<uint64_t> &v) {
     int sz = v.size();
       n = 1; while(n < sz) n *= 2;
       node.resize(2*n-1, INF);
-      for(int i=0; i<sz; i++) node[i+n-1] = v[i];
+      for(int i=0; i<sz; i++) node[i+n-1] = v.at(i);
       for(int i=n-2; i>=0; i--) node[i] = std::min(node[2*i+1], node[2*i+2]);
   }
 

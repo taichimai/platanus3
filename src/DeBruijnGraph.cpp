@@ -376,10 +376,10 @@ void DeBruijnGraph<LARGE_BITSET>::AddJointNode(LARGE_BITSET &added_node){
 template<typename LARGE_BITSET>
 void DeBruijnGraph<LARGE_BITSET>::AddStraightNode(std::string &added_straight_node,LARGE_BITSET &left_joint_node,LARGE_BITSET &right_joint_node){
     std::lock_guard<std::mutex> lock(mtx_straights);
-    if (IsVisited(left_joint_node)){
-        //(*logging).WriteLog("prevented new registrations");
-        return;
-    } 
+    // if (IsVisited(left_joint_node)){
+    //     //(*logging).WriteLog("prevented new registrations");
+    //     return;
+    // } 
     straight_nodes_id++;
     (*logging).WriteLog("add straight node "+std::to_string(straight_nodes_id));
     straights[straight_nodes_id].sequence=added_straight_node;
