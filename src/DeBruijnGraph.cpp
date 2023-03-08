@@ -299,23 +299,22 @@ LARGE_BITSET DeBruijnGraph<LARGE_BITSET>::ExtendRight(LARGE_BITSET target_kmer,L
     return previous_kmer;   
 }
 
-
-
-
-
-
 template<typename LARGE_BITSET>
 bool DeBruijnGraph<LARGE_BITSET>::IsVisited(LARGE_BITSET &seqrching_kmer){
+    bool is_visited=false;
     LARGE_BITSET seqrching_kmer_bw=GetComplementKmer(seqrching_kmer);
-    std::lock_guard<std::mutex> lock1(mtx_junctions);
-    std::lock_guard<std::mutex> lock2(mtx_joints);
+    std::lock(mtx_junctions, mtx_joints);
     if (junctions.find(seqrching_kmer)!=junctions.end() || junctions.find(seqrching_kmer_bw)!=junctions.end()){
-        return true;
+        is_visited=true;
     }
     else if (joints.find(seqrching_kmer)!=joints.end() || joints.find(seqrching_kmer_bw)!=joints.end()){
-        return true;
+        is_visited=true;
     }
-    else return false;
+    else is_visited=false;
+
+    mtx_joints.unlock();
+    mtx_junctions.unlock();
+    return is_visited;
 }
 
 template<typename LARGE_BITSET>
@@ -378,7 +377,7 @@ template<typename LARGE_BITSET>
 void DeBruijnGraph<LARGE_BITSET>::AddStraightNode(std::string &added_straight_node,LARGE_BITSET &left_joint_node,LARGE_BITSET &right_joint_node){
     std::lock_guard<std::mutex> lock(mtx_straights);
     if (IsVisited(left_joint_node)){
-        (*logging).WriteLog("prevented new registrations");
+        //(*logging).WriteLog("prevented new registrations");
         return;
     } 
     straight_nodes_id++;

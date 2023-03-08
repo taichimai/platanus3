@@ -1,6 +1,7 @@
 #ifndef LOAD_CPP
 #define LOAD_CPP
 #include"common.h"
+#include"BitCalc.cpp"
 
 class ReadFile{
     public:
@@ -102,26 +103,25 @@ void ReadFile::LoadFastq(ReadSet *loaded_reads,std::string file_name){
 }
 
 void ReadFile::CountShortKmer(int shortk_length){
+    std::bitset<42>  A_right_short(0); std::bitset<42> A_left_short=(A_right_short<<(shortk_length*2-2)); 
+    std::bitset<42>  C_right_short(1); std::bitset<42> C_left_short=(C_right_short<<(shortk_length*2-2));
+    std::bitset<42>  G_right_short(2); std::bitset<42> G_left_short=(G_right_short<<(shortk_length*2-2));
+    std::bitset<42>  T_right_short(3); std::bitset<42> T_left_short=(T_right_short<<(shortk_length*2-2));
+    std::vector<std::bitset<42>> end_bases_short={A_left_short,C_left_short,G_left_short,T_left_short,A_right_short,C_right_short,G_right_short,T_right_short};
+    
     KmerCount all_short_kmers;
     for (auto itr = reads.begin(); itr!=reads.end();++itr){
-        for (int i=0;i<(itr->second).size()+1-shortk_length ;i++){
-            std::string shortk_for=(itr->second).substr(i,shortk_length);
-            std::string shortk_rev=shortk_for;
-            std::reverse(shortk_rev.begin(), shortk_rev.end()); // reverse
-		    for (int j = 0; j < shortk_length; ++j) { // complement
-			    if (shortk_rev[j] == 'A') shortk_rev[j] = 'T';
-			    else if (shortk_rev[j] == 'T') shortk_rev[j] = 'A';
-			    else if (shortk_rev[j] == 'C') shortk_rev[j] = 'G';
-			    else if (shortk_rev[j] == 'G') shortk_rev[j] = 'C';
-		    }
+      std::string target_read = (itr->second); 
+      std::bitset<42> shortk_for=GetFirstKmerForward<std::bitset<42>>(target_read.substr(0,shortk_length));
+      std::bitset<42> shortk_rev=GetFirstKmerBackward<std::bitset<42>>(target_read.substr(0,shortk_length));
 
-            if (shortk_for<shortk_rev){
-                all_short_kmers[shortk_for]++;
-            }
-            else{
-                all_short_kmers[shortk_rev]++;
-            }
+      for (int i=shortk_length-1;i<target_read.size();i++){
+        if (i!=shortk_length-1){
+          shortk_for=( (shortk_for<<2) | end_bases_short[ base_to_bit[ target_read[i] ] + 4 ]   );
+          shortk_rev=( (shortk_rev>>2) | end_bases_short[ base_to_bit[ trans_base[target_read[i]] ] ] );
         }
+        all_short_kmers[CompareBit(shortk_for,shortk_rev,42)]++;
+      }
     }
     this->shortk_database=all_short_kmers;
 }

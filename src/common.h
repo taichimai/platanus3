@@ -22,7 +22,7 @@
 
 typedef int Error;
 typedef std::unordered_map<std::string,std::string> ReadSet;
-typedef std::unordered_map<std::string,uint64_t> KmerCount;
+typedef std::unordered_map<std::bitset<42>,uint64_t> KmerCount;
 //typedef std::set<std::string>  KmerSet;
 typedef int id_counter;
 uint64_t INF=(1LL<<60);
