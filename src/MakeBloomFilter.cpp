@@ -52,13 +52,8 @@ BF<LARGE_BITSET> MakeBF(ReadSet &RS,KmerCount &KC,uint64_t filtersize ,uint8_t n
   std::vector<std::bitset<42>> end_bases_short={A_left_short,C_left_short,G_left_short,T_left_short,A_right_short,C_right_short,G_right_short,T_right_short};
 
 
-  //for(size_t b=0;b<RS.bucket_count();b++)
-  //for(auto bi=RS.begin(b);bi!=RS.end(b);bi++){
-
-  
-  logging.WriteLog(std::to_string(RS.size()));
-  for(auto bi=RS.begin();bi!=RS.end();++bi){
-    logging.WriteLog((bi->second)+"_S"); 
+  for(size_t b=0;b<RS.bucket_count();b++)
+  for(auto bi=RS.begin(b);bi!=RS.end(b);bi++){
     //calculate 21-mer coverage
     std::vector<uint64_t> shortk_cov;
     shortk_cov.resize((bi->second).size()-shortk_length+1,0);
@@ -66,17 +61,13 @@ BF<LARGE_BITSET> MakeBF(ReadSet &RS,KmerCount &KC,uint64_t filtersize ,uint8_t n
     std::bitset<42> shortk_for=GetFirstKmerForward<std::bitset<42>>((bi->second).substr(0,shortk_length));
     std::bitset<42> shortk_rev=GetFirstKmerBackward<std::bitset<42>>((bi->second).substr(0,shortk_length));
 
-
     for (int i=shortk_length-1;i<(bi->second).size();i++){
-      logging.WriteLog(std::to_string(i));
       if (i!=shortk_length-1){
         shortk_for=( (shortk_for<<2) | end_bases_short[ base_to_bit[ (bi->second)[i] ] + 4 ]   );
         shortk_rev=( (shortk_rev>>2) | end_bases_short[ base_to_bit[ trans_base[(bi->second)[i]] ] ] );
       }
       shortk_cov[i-shortk_length+1]=KC[CompareBit(shortk_for,shortk_rev,42)];
     }
-    
-    logging.WriteLog((bi->second)); 
 
     //use segment tree for estimating large kmer coverage
     SegmentTree shortk_tree(shortk_cov);
@@ -102,7 +93,6 @@ BF<LARGE_BITSET> MakeBF(ReadSet &RS,KmerCount &KC,uint64_t filtersize ,uint8_t n
         }
       }
     }
-    logging.WriteLog((bi->second)+"_F"); 
   }
 
   return Kmer_BF;

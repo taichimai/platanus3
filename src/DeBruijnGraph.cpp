@@ -458,7 +458,9 @@ void DeBruijnGraph<LARGE_BITSET>::PrintGraph(){
     std::string output_file ="./de_bruijn_graph.gfa";
     writing_gfa.open(output_file, std::ios::out);
     //header
+    (*logging).WriteLog("PrintGraph");
     writing_gfa<<"H\tVN:Z:1.0"<<"\n";
+    (*logging).WriteLog("Point");
     //nodes(straight)
     for (auto itr=straights.begin();itr!=straights.end();++itr){
         writing_gfa<<"S"<<"\t"<<"Straight_"<<(itr->first)<<"\t"<<(itr->second).sequence<<"\t"<<"KC:i:"<<(itr->second).sequence.size()<<"\n";
@@ -467,9 +469,11 @@ void DeBruijnGraph<LARGE_BITSET>::PrintGraph(){
     for (auto itr=junctions.begin();itr!=junctions.end();++itr){
         writing_gfa<<"S"<<"\t"<<"Junction_"<<(itr->second).id<<"\t"<<GetStringKmer((itr->first))<<"\t"<<"KC:i:"<<(itr->second).coverage*kmer_length<<"\n";
     }
+    (*logging).WriteLog("Point1");
 
     //edges(junction and straight)
     for (auto itr = junctions.begin(); itr!=junctions.end(); ++itr){
+        (*logging).WriteLog("Point2");
         //left
         for (int i = 0; i < 4 ; i++){
             if ((itr->second).left_kmers_cov[i]==0) continue;
@@ -477,33 +481,42 @@ void DeBruijnGraph<LARGE_BITSET>::PrintGraph(){
             if (!IsRecorded(*all_kmers,output_left_kmer)) continue;
             if (junctions.find(output_left_kmer)!=junctions.end()){
                 writing_gfa<<"L"<<"\t";
+                (*logging).WriteLog("L1");
                 writing_gfa<<"Junction_"<<junctions[output_left_kmer].id<<"\t+\t";
                 writing_gfa<<"Junction_"<<(itr->second).id<<"\t+\t";
                 writing_gfa<<kmer_length-1<<"M"<<"\n";
+                (*logging).WriteLog("L1F");
             }
             else if (joints.find(output_left_kmer)!=joints.end()){
                 writing_gfa<<"L"<<"\t";
+                (*logging).WriteLog("L2");
                 writing_gfa<<"Straight_"<<(*(joints[output_left_kmer].connected_straight)).id<<"\t+\t";
                 writing_gfa<<"Junction_"<<(itr->second).id<<"\t+\t";
                 writing_gfa<<kmer_length-1<<"M"<<"\n";
+                (*logging).WriteLog("L2F");
             }
             else{
                 //complement
                 LARGE_BITSET output_left_kmer_bw=GetComplementKmer(output_left_kmer);
                 if (junctions.find(output_left_kmer_bw)!=junctions.end()){
                     writing_gfa<<"L"<<"\t";
+                    (*logging).WriteLog("L3");
                     writing_gfa<<"Junction_"<<junctions[output_left_kmer_bw].id<<"\t-\t";
                     writing_gfa<<"Junction_"<<(itr->second).id<<"\t+\t";
                     writing_gfa<<kmer_length-1<<"M"<<"\n";
+                    (*logging).WriteLog("L3F");
                 }
                 else if (joints.find(output_left_kmer_bw)!=joints.end()){
                     writing_gfa<<"L"<<"\t";
+                    (*logging).WriteLog("L4");
                     writing_gfa<<"Straight_"<<(*(joints[output_left_kmer_bw].connected_straight)).id<<"\t-\t";
                     writing_gfa<<"Junction_"<<(itr->second).id<<"\t+\t";
                     writing_gfa<<kmer_length-1<<"M"<<"\n";
+                    (*logging).WriteLog("L4F");
                 }
             }
         }
+        (*logging).WriteLog("Point3");
         //right
         for (int i = 0; i < 4 ; i++){
             if ((itr->second).right_kmers_cov[i]==0) continue;
@@ -539,6 +552,7 @@ void DeBruijnGraph<LARGE_BITSET>::PrintGraph(){
                 }
             }
         }
+        (*logging).WriteLog("Point4");
     }
 }
 #endif
