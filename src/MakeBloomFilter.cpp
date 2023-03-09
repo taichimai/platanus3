@@ -5,33 +5,21 @@
 #include"BitCalc.cpp"
 #include"bloomfilter.cpp"
 
-
-struct SegmentTree {
-private:
-  uint64_t n;
-  std::vector<uint64_t> node;
-
-
-public:
-  SegmentTree(std::vector<uint64_t> &v) {
-    int sz = v.size();
-      n = 1; while(n < sz) n *= 2;
-      node.resize(2*n-1, INF);
-      for(int i=0; i<sz; i++) node[i+n-1] = v.at(i);
-      for(int i=n-2; i>=0; i--) node[i] = std::min(node[2*i+1], node[2*i+2]);
+std::vector<uint64_t> RMQ(std::vector<uint64_t> v,int x){
+  std::deque<std::pair<int,uint64_t>> deq;
+  std::vector<uint64_t> rmq;
+  int num=0;
+  for (int i = 0; i < v.size(); i++){
+    while ((!deq.empty()) && deq.back().second>v[i] ){
+      deq.pop_back();
+    }
+    deq.push_back({i,v[i]});
+    if (deq.front().first+x==i) deq.pop_front();
+    num=deq.front().second;
+    if (x-1<=i) rmq.push_back(num);
   }
-
-  uint64_t getmin(int a, int b, int k=0, int l=0, int r=-1) {
-    if(r < 0) r = n;
-    if(r <= a || b <= l) return INF;
-    if(a <= l && r <= b) return node[k];
-
-    uint64_t vl = getmin(a, b, 2*k+1, l, (l+r)/2);
-    uint64_t vr = getmin(a, b, 2*k+2, (l+r)/2, r);
-    return std::min(vl, vr);
-  }
-
-};
+  return rmq;
+}
 
 template<typename LARGE_BITSET>
 BF<LARGE_BITSET> MakeBF(ReadSet &RS,KmerCount &KC,uint64_t filtersize ,uint8_t numhashes,int kmer_length,std::set<std::string> *seed_kmer,Logging &logging){
@@ -70,7 +58,13 @@ BF<LARGE_BITSET> MakeBF(ReadSet &RS,KmerCount &KC,uint64_t filtersize ,uint8_t n
     }
 
     //use segment tree for estimating large kmer coverage
-    SegmentTree shortk_tree(shortk_cov);
+
+    std::vector<uint64_t> rmq=RMQ(shortk_cov,kmer_length);
+    
+    logging.WriteLog("read: "+std::to_string((bi->second).size()));
+    logging.WriteLog("shortk_cov : "+std::to_string(shortk_cov.size()));
+    logging.WriteLog("rmq : "+std::to_string(rmq.size()));
+
     bool is_seedkmer_recorded=false;
     
     LARGE_BITSET kmer_Fw=GetFirstKmerForward<LARGE_BITSET>((bi->second).substr(0,kmer_length));
@@ -82,7 +76,7 @@ BF<LARGE_BITSET> MakeBF(ReadSet &RS,KmerCount &KC,uint64_t filtersize ,uint8_t n
         kmer_Fw=((kmer_Fw<<2)| end_bases[ base_to_bit[ (bi->second)[i] ] + 4 ] );
         kmer_Bw=((kmer_Bw>>2)| end_bases[ base_to_bit[ trans_base[(bi->second)[i]] ] ] );
       }
-      if (shortk_tree.getmin((i-kmer_length)+1,(i-kmer_length+1)+kmer_length-shortk_length+1)>=cov_threshold){
+      if (rmq[i-kmer_length+1]>=cov_threshold){
         KmerItem=CompareBit(kmer_Fw,kmer_Bw,kmer_length*2);
         Kmer_BF.add(&KmerItem,kmer_length*2);
 
