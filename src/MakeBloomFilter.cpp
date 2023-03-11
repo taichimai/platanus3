@@ -59,7 +59,7 @@ BF<LARGE_BITSET> MakeBF(ReadSet &RS,KmerCount &KC,uint64_t filtersize ,uint8_t n
 
     //use segment tree for estimating large kmer coverage
 
-    std::vector<uint64_t> rmq=RMQ(shortk_cov,kmer_length);
+    std::vector<uint64_t> rmq=RMQ(shortk_cov,kmer_length-shortk_length+1);
     
     logging.WriteLog("read: "+std::to_string((bi->second).size()));
     logging.WriteLog("shortk_cov : "+std::to_string(shortk_cov.size()));
