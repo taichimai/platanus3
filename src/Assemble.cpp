@@ -7,9 +7,9 @@ template<typename LARGE_BITSET>
 int Assemble (ReadFile &input_reads,Options &options,Logging &logging){
     logging.WriteLog("Assemble");
     input_reads.CountShortKmer(options.shortk_length);
-    logging.WriteLog("count short kmer");
+    logging.WriteLog("counted short kmer");
     std::set<std::string> seedkmer;
-    BF<LARGE_BITSET> first_bloom_filter=MakeBF<LARGE_BITSET>(input_reads.reads,input_reads.shortk_database,options.filter_size,options.num_hashes,options.kmer_length,&seedkmer); //make bloomfilter
+    BF<LARGE_BITSET> first_bloom_filter=MakeBF<LARGE_BITSET>(input_reads.reads,input_reads.shortk_database,options.filter_size,options.num_hashes,options.kmer_length,&seedkmer,logging); //make bloomfilter
 
     logging.WriteLog("bloom filter loaded");
     logging.WriteLog("get seed kmer");

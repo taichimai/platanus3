@@ -156,9 +156,7 @@ void DeBruijnGraph<LARGE_BITSET>::MakeDBG(std::set<std::string> &seedkmer,uint64
 
 template<typename LARGE_BITSET>
 void DeBruijnGraph<LARGE_BITSET>::SearchNode(LARGE_BITSET target_kmer){
-    (*logging).WriteLog("check visited");
     if (IsVisited(target_kmer)) return;
-    (*logging).WriteLog("this node has not visited");
 
     //search eight directions
     std::vector<LARGE_BITSET> stock_left;
@@ -191,7 +189,6 @@ void DeBruijnGraph<LARGE_BITSET>::SearchNode(LARGE_BITSET target_kmer){
         left_part+=extend_bases_left[i];
     }
     if (IsVisited(left_end_kmer)){
-        //std::cout<<"this straight left part has already visited"<<"\n";
         (*logging).WriteLog("this straight left part has already visited");
         return;
     } 
@@ -222,8 +219,6 @@ void DeBruijnGraph<LARGE_BITSET>::SearchNode(LARGE_BITSET target_kmer){
         (*logging).WriteLog("record straight node");
 
         std::string straightnode=left_part+GetStringKmer(target_kmer)+right_part;
-        AddJointNode(left_end_kmer);
-        AddJointNode(right_end_kmer);
         AddStraightNode(straightnode,left_end_kmer,right_end_kmer);
     }
     return;
@@ -301,23 +296,22 @@ LARGE_BITSET DeBruijnGraph<LARGE_BITSET>::ExtendRight(LARGE_BITSET target_kmer,L
     return previous_kmer;   
 }
 
-
-
-
-
-
 template<typename LARGE_BITSET>
 bool DeBruijnGraph<LARGE_BITSET>::IsVisited(LARGE_BITSET &seqrching_kmer){
+    bool is_visited=false;
     LARGE_BITSET seqrching_kmer_bw=GetComplementKmer(seqrching_kmer);
-    std::lock_guard<std::mutex> lock1(mtx_junctions);
-    std::lock_guard<std::mutex> lock2(mtx_joints);
+    std::lock(mtx_junctions, mtx_joints);
     if (junctions.find(seqrching_kmer)!=junctions.end() || junctions.find(seqrching_kmer_bw)!=junctions.end()){
-        return true;
+        is_visited=true;
     }
     else if (joints.find(seqrching_kmer)!=joints.end() || joints.find(seqrching_kmer_bw)!=joints.end()){
-        return true;
+        is_visited=true;
     }
-    else return false;
+    else is_visited=false;
+
+    mtx_joints.unlock();
+    mtx_junctions.unlock();
+    return is_visited;
 }
 
 template<typename LARGE_BITSET>
@@ -379,6 +373,9 @@ void DeBruijnGraph<LARGE_BITSET>::AddJointNode(LARGE_BITSET &added_node){
 template<typename LARGE_BITSET>
 void DeBruijnGraph<LARGE_BITSET>::AddStraightNode(std::string &added_straight_node,LARGE_BITSET &left_joint_node,LARGE_BITSET &right_joint_node){
     std::lock_guard<std::mutex> lock(mtx_straights);
+    if (IsVisited(left_joint_node)) return;
+    AddJointNode(left_joint_node);
+    AddJointNode(right_joint_node);
     straight_nodes_id++;
     (*logging).WriteLog("add straight node "+std::to_string(straight_nodes_id));
     straights[straight_nodes_id].sequence=added_straight_node;
@@ -491,18 +488,23 @@ void DeBruijnGraph<LARGE_BITSET>::PrintGraph(){
                 LARGE_BITSET output_left_kmer_bw=GetComplementKmer(output_left_kmer);
                 if (junctions.find(output_left_kmer_bw)!=junctions.end()){
                     writing_gfa<<"L"<<"\t";
+            
                     writing_gfa<<"Junction_"<<junctions[output_left_kmer_bw].id<<"\t-\t";
                     writing_gfa<<"Junction_"<<(itr->second).id<<"\t+\t";
                     writing_gfa<<kmer_length-1<<"M"<<"\n";
+                   
                 }
                 else if (joints.find(output_left_kmer_bw)!=joints.end()){
                     writing_gfa<<"L"<<"\t";
+                  
                     writing_gfa<<"Straight_"<<(*(joints[output_left_kmer_bw].connected_straight)).id<<"\t-\t";
                     writing_gfa<<"Junction_"<<(itr->second).id<<"\t+\t";
                     writing_gfa<<kmer_length-1<<"M"<<"\n";
+                  
                 }
             }
         }
+      
         //right
         for (int i = 0; i < 4 ; i++){
             if ((itr->second).right_kmers_cov[i]==0) continue;
