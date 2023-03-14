@@ -26,6 +26,9 @@ BF<LARGE_BITSET> MakeBF(ReadSet &RS,KmerCount &KC,uint64_t filtersize ,uint8_t n
   BF<LARGE_BITSET> Kmer_BF(filtersize,numhashes);
   const uint32_t shortk_length=21;
   const uint64_t cov_threshold=2;
+  uint64_t read_num=RS.size();
+  uint64_t max_seed_num= std::max((uint64_t)2000,read_num/100);
+  uint64_t seed_num=0;
 
   LARGE_BITSET A_right(0); LARGE_BITSET A_left=(A_right<<(kmer_length*2-2)); 
   LARGE_BITSET C_right(1); LARGE_BITSET C_left=(C_right<<(kmer_length*2-2));
@@ -76,10 +79,11 @@ BF<LARGE_BITSET> MakeBF(ReadSet &RS,KmerCount &KC,uint64_t filtersize ,uint8_t n
         KmerItem=CompareBit(kmer_Fw,kmer_Bw,kmer_length*2);
         Kmer_BF.add(&KmerItem,kmer_length*2);
 
-        if (!is_seedkmer_recorded){
+        if ( (!is_seedkmer_recorded) && seed_num<max_seed_num){
           std::string recording_kmer=GetStringKmer<LARGE_BITSET>(kmer_Fw);
           (*seed_kmer).insert(recording_kmer);
           is_seedkmer_recorded=true;
+          seed_num++;
         }
       }
     }
